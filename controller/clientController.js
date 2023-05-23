@@ -1,9 +1,8 @@
-import jwt from "jsonwebtoken";
-import Client from "../model/clientModel.js";
+import User from "../model/userModel.js";
 
 const createClient = async (req, res) => {
   const {
-    clientName,
+    name,
     email,
     phoneNumber,
     DOB,
@@ -12,16 +11,10 @@ const createClient = async (req, res) => {
     companyName,
     socialSecurityNumber,
   } = req.body;
-  // console.log(req.body);
-  const user = await Client.findOne({ email: email });
+  const user = await User.findOne({ email: email });
   if (user) {
-    res.status(400).json({
-      success: false,
-      message: "Client already exist against this email",
-    });
-  } else {
     if (
-      (clientName && email && phoneNumber,
+      (name && email && phoneNumber,
       DOB &&
         identificationNumber &&
         guddgeEmailPlan &&
@@ -29,31 +22,21 @@ const createClient = async (req, res) => {
         socialSecurityNumber)
     ) {
       try {
-        const newUser = new Client({
-          clientName: clientName,
-          email: email,
-          phoneNumber: phoneNumber,
-          DOB: DOB,
-          identificationNumber: identificationNumber,
-          companyName: companyName,
-          guddgeEmailPlan: guddgeEmailPlan,
-          socialSecurityNumber: socialSecurityNumber,
-        });
-        await newUser.save();
+        user.name = name || user.name;
+        user.email = email || user.email;
+        user.phoneNumber = phoneNumber || user.phoneNumber;
+        user.DOB = DOB || user.DOB;
+        user.identificationNumber =
+          identificationNumber || user.identificationNumber;
+        user.guddgeEmailPlan = guddgeEmailPlan || user.guddgeEmailPlan;
+        user.companyName = companyName || user.companyName;
+        user.socialSecurityNumber =
+          socialSecurityNumber || user.socialSecurityNumber;
+        await user.save();
 
-        const saveUser = await Client.findOne({ email: email });
-        const token = jwt.sign(
-          { userId: saveUser._id },
-          process.env.JWT_SECRET,
-          { expiresIn: "10d" }
-        );
         res.status(200).json({
           success: true,
           message: "Client created successful",
-          userID: saveUser._id,
-          clientName: saveUser.clientName,
-          //   role: saveUser.role,
-          token: token,
         });
       } catch (error) {
         console.log(error);
@@ -68,6 +51,11 @@ const createClient = async (req, res) => {
         message: "Please fill empty fields",
       });
     }
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "Client do not exist against this email",
+    });
   }
 };
 

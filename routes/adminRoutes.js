@@ -3,6 +3,6 @@ import { createAdmin } from "../controller/adminController.js";
 
 const adminroute = express.Router();
 
-adminroute.post("/admin", createAdmin);
+adminroute.put("/admin", createAdmin);
 
 export default adminroute;

@@ -1,38 +1,21 @@
-import Admin from "../model/adminModel.js";
-import jwt from "jsonwebtoken";
+import User from "../model/userModel.js";
 
 const createAdmin = async (req, res) => {
-  const { adminName, email, phoneNumber, DOB } = req.body;
-  // console.log(req.body);
-  const user = await Admin.findOne({ email: email });
+  const { name, email, phoneNumber, DOB } = req.body;
+  const user = await User.findOne({ email: email });
   if (user) {
-    res.status(400).json({
-      success: false,
-      message: "Admin already exist against this email",
-    });
-  } else {
-    if ((adminName && email && phoneNumber, DOB)) {
+    if (name && email && phoneNumber && DOB) {
       try {
-        const newUser = new Admin({
-          adminName: adminName,
-          email: email,
-          phoneNumber: phoneNumber,
-          DOB: DOB,
-        });
-        await newUser.save();
+        user.name = name || user.name;
+        user.email = email || user.email;
+        user.phoneNumber = phoneNumber || user.phoneNumber;
+        user.DOB = DOB || user.DOB;
 
-        const saveUser = await Admin.findOne({ email: email });
-        const token = jwt.sign(
-          { userId: saveUser._id },
-          process.env.JWT_SECRET,
-          { expiresIn: "10d" }
-        );
+        await user.save();
+
         res.status(200).json({
           success: true,
           message: "Admin created successful",
-          userID: saveUser._id,
-          adminName: saveUser.adminName,
-          token: token,
         });
       } catch (error) {
         console.log(error);
@@ -47,6 +30,11 @@ const createAdmin = async (req, res) => {
         message: "Please fill empty fields",
       });
     }
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "Admin do not exist against this email",
+    });
   }
 };
 

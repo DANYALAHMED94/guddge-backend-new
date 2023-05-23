@@ -3,6 +3,6 @@ import { createContractor } from "../controller/contractorController.js";
 
 const contractorRoute = express.Router();
 
-contractorRoute.post("/contractors", createContractor);
+contractorRoute.put("/contractors", createContractor);
 
 export default contractorRoute;

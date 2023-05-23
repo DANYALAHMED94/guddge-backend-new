@@ -1,9 +1,9 @@
-import Contractor from "../model/contractorModel.js";
+import User from "../model/userModel.js";
 import jwt from "jsonwebtoken";
 
 const createContractor = async (req, res) => {
   const {
-    contractorName,
+    name,
     email,
     jobTitle,
     phoneNumber,
@@ -21,15 +21,10 @@ const createContractor = async (req, res) => {
     emailingAddressForSoftCopies,
   } = req.body;
   // console.log(req.body);
-  const user = await Contractor.findOne({ email: email });
+  const user = await User.findOne({ email: email });
   if (user) {
-    res.status(400).json({
-      success: false,
-      message: "Contractor already exist against this email",
-    });
-  } else {
     if (
-      (contractorName && email && jobTitle && phoneNumber,
+      (name && email && jobTitle && phoneNumber,
       DOB &&
         joiningDate &&
         totalYearExperince &&
@@ -44,37 +39,30 @@ const createContractor = async (req, res) => {
         emailingAddressForSoftCopies)
     ) {
       try {
-        const newUser = new Contractor({
-          contractorName: contractorName,
-          email: email,
-          jobTitle: jobTitle,
-          phoneNumber: phoneNumber,
-          DOB: DOB,
-          joiningDate: joiningDate,
-          totalYearExperince: totalYearExperince,
-          guddgeEmailPlan: guddgeEmailPlan,
-          agreement: agreement,
-          agreementEndDate: agreementEndDate,
-          shore: shore,
-          companyName: companyName,
-          identificationNumber: identificationNumber,
-          socialSecurityNumber: socialSecurityNumber,
-          mailingAddress: mailingAddress,
-          emailingAddressForSoftCopies: emailingAddressForSoftCopies,
-        });
-        await newUser.save();
-        const saveUser = await Contractor.findOne({ email: email });
-        const token = jwt.sign(
-          { userId: saveUser._id },
-          process.env.JWT_SECRET,
-          { expiresIn: "10d" }
-        );
+        user.name = name || user.name;
+        user.email = email || user.email;
+        user.jobTitle = jobTitle || user.jobTitle;
+        user.phoneNumber = phoneNumber || user.phoneNumber;
+        user.DOB = DOB || user.DOB;
+        user.totalYearExperince = totalYearExperince || user.totalYearExperince;
+        user.guddgeEmailPlan = guddgeEmailPlan || user.guddgeEmailPlan;
+        user.agreement = agreement || user.agreement;
+        user.shore = shore || user.shore;
+        user.agreementEndDate = agreementEndDate || user.agreementEndDate;
+        user.companyName = companyName || user.companyName;
+        user.identificationNumber =
+          identificationNumber || user.identificationNumber;
+        user.socialSecurityNumber =
+          socialSecurityNumber || user.socialSecurityNumber;
+        user.mailingAddress = mailingAddress || user.mailingAddress;
+        user.emailingAddressForSoftCopies =
+          emailingAddressForSoftCopies || user.emailingAddressForSoftCopies;
+        user.joiningDate = joiningDate || user.joiningDate;
+
+        await user.save();
         res.status(200).json({
           success: true,
           message: "Contractor created successful",
-          userID: saveUser._id,
-          contractorName: saveUser.contractorName,
-          token: token,
         });
       } catch (error) {
         console.log(error);
@@ -89,6 +77,11 @@ const createContractor = async (req, res) => {
         message: "Please fill empty fields",
       });
     }
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "Contractor do not exist against this email",
+    });
   }
 };
 

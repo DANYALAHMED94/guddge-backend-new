@@ -116,4 +116,29 @@ const allAdmins = async (req, res) => {
   }
 };
 
-export { Signup, Login, allAdmins };
+const allUsersDateOfBirth = async (req, res) => {
+  const projection = {
+    name: 1,
+    role: 1,
+    DOB: 1,
+    color: { $literal: "pink" },
+  };
+  const filter = { DOB: { $exists: true } };
+  try {
+    const admin = await User.find(filter, projection);
+    res.status(200).json({
+      success: true,
+      message: "All users",
+      admin,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: true,
+      message: "Users not found",
+      admin,
+    });
+  }
+};
+
+export { Signup, Login, allAdmins, allUsersDateOfBirth };

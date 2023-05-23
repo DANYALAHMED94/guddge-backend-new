@@ -3,6 +3,6 @@ import { createClient } from "../controller/clientController.js";
 
 const clientRoute = express.Router();
 
-clientRoute.post("/clients", createClient);
+clientRoute.put("/clients", createClient);
 
 export default clientRoute;
