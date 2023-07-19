@@ -340,32 +340,118 @@ const sheetRejectDecsById = async (req, res) => {
 
 const allTimeSheetsReports = async (req, res) => {
   const { contractor, date, category } = req.query;
-  console.log(contractor, date, category);
+  const startDate = "";
+  const endDate = "";
+  // const matchQuery = {
+  //   status: "Approved",
+  //   $or: [
+  //     {
+  //       $and: [
+  //         { name: { $regex: `${contractor}`, $options: "i" } },
+  //         {
+  //           "dataSheet.invoiceCategory": {
+  //             $regex: `${category}`,
+  //             $options: "i",
+  //           },
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       $and: [
+  //         { name: { $exists: false } },
+  //         { "dataSheet.invoiceCategory": { $exists: false } },
+  //       ],
+  //     },
+  //   ],
+  // };
+
+  // // Check if startDate and endDate are provided, then add the approvalDate condition to the match query
+  // if (startDate && endDate) {
+  //   matchQuery.$or[0].$and.push({
+  //     approvalDate: { $gte: startDate, $lte: endDate },
+  //   });
+  // }
   try {
-    const filter = {
-      status: "Approved",
-    };
-    if (contractor) {
-      filter.name = { $regex: contractor, $options: "i" };
-    }
-
-    if (date) {
-      filter.approvalDate = { $regex: date, $options: "i" };
-    }
-
-    // const data = await TimeSheet.find(filter);
     const data = await TimeSheet.aggregate([
+      // simple filter date
       {
         $match: {
+          status: "Approved",
           $or: [
             {
-              name: { $regex: contractor, $options: "i" },
-              approvalDate: `${date}`,
-              "dataSheet.invoiceCategory": { $regex: category, $options: "i" },
+              $and: [
+                { name: { $regex: `${contractor}`, $options: "i" } },
+                { approvalDate: { $regex: `${date}`, $options: "i" } },
+                {
+                  "dataSheet.invoiceCategory": {
+                    $regex: `${category}`,
+                    $options: "i",
+                  },
+                },
+              ],
+            },
+            {
+              $and: [
+                { name: { $exists: false } },
+                { approvalDate: date },
+                { "dataSheet.invoiceCategory": { $exists: false } },
+              ],
+            },
+            {
+              $and: [
+                { name: { $exists: false } },
+                { approvalDate: { $exists: false } },
+                {
+                  "dataSheet.invoiceCategory": {
+                    $regex: `${category}`,
+                    $options: "i",
+                  },
+                },
+              ],
             },
           ],
         },
       },
+
+      // for date range
+      // {
+      //   $match: {
+      //     status: "Approved",
+      //     $or: [
+      //       {
+      //         $and: [
+      //           { name: { $regex: `${contractor}`, $options: "i" } },
+      //           { approvalDate: { $gte: startDate, $lte: endDate } },
+      //           {
+      //             "dataSheet.invoiceCategory": {
+      //               $regex: `${category}`,
+      //               $options: "i",
+      //             },
+      //           },
+      //         ],
+      //       },
+      //       {
+      //         $and: [
+      //           { name: { $exists: false } },
+      //           { approvalDate: { $gte: startDate, $lte: endDate } },
+      //           { "dataSheet.invoiceCategory": { $exists: false } },
+      //         ],
+      //       },
+      //       {
+      //         $and: [
+      //           { name: { $exists: false } },
+      //           { approvalDate: { $exists: false } },
+      //           {
+      //             "dataSheet.invoiceCategory": {
+      //               $regex: `${category}`,
+      //               $options: "i",
+      //             },
+      //           },
+      //         ],
+      //       },
+      //     ],
+      //   },
+      // },
       { $unwind: "$dataSheet" },
 
       {
@@ -373,7 +459,19 @@ const allTimeSheetsReports = async (req, res) => {
           "dataSheet.invoiceCategory": { $regex: category, $options: "i" },
         },
       },
-    ]);
+      {
+        $group: {
+          _id: "$_id",
+          document: { $first: "$$ROOT" },
+        },
+      },
+
+      {
+        $replaceRoot: {
+          newRoot: "$document",
+        },
+      },
+    ]).sort({ timeSheetName: 1 });
 
     res.status(200).json({
       success: true,
@@ -381,6 +479,7 @@ const allTimeSheetsReports = async (req, res) => {
       data,
     });
   } catch (error) {
+    console.log(error.message);
     res.status(200).json({
       success: false,
       message: "something wents wrong",
@@ -468,7 +567,53 @@ const allAdminRejected = async (req, res) => {
     const data = await TimeSheet.find({ status: "Rejected" });
     res.status(200).json({
       success: true,
-      message: "Approved",
+      message: "all rejected",
+      data,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something wents wrong!",
+    });
+  }
+};
+
+const getCategories = async (req, res) => {
+  try {
+    const data = await TimeSheet.aggregate([
+      {
+        $unwind: "$dataSheet", // Unwind the array into separate documents
+      },
+      {
+        $group: {
+          _id: "$dataSheet.invoiceCategory", // Group by the unique category values
+        },
+      },
+
+      {
+        $match: {
+          // Exclude categories with specific names
+          _id: {
+            $nin: ["N/A", ""],
+            $exists: true,
+            $ne: null,
+            $ne: "",
+          },
+        },
+      },
+
+      {
+        $project: {
+          _id: 0, // Exclude the default "_id" field from the result
+          category: "$_id", // Rename the "_id" field to "category"
+        },
+      },
+    ]).sort({ invoiceCategory: 1 });
+
+    res.status(200).json({
+      success: true,
+      message: "Categories",
       data,
     });
   } catch (error) {
@@ -498,4 +643,5 @@ export {
   allAdminApproval,
   allAdminApproved,
   allAdminRejected,
+  getCategories,
 };

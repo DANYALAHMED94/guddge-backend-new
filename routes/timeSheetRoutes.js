@@ -16,6 +16,7 @@ import {
   allAdminApproval,
   allAdminApproved,
   allAdminRejected,
+  getCategories,
 } from "../controller/timeSheetController.js";
 import express from "express";
 
@@ -24,6 +25,7 @@ const timeSheetRouter = express.Router();
 timeSheetRouter.post("/view-time-sheets", timeSheetData);
 timeSheetRouter.get("/timesheets/approval/:id", getTimeSheetData);
 timeSheetRouter.get("/timesheets/approval", allAdminApproval);
+timeSheetRouter.get("/timesheets-categories", getCategories);
 
 timeSheetRouter.get("/view-time-sheets/:id", getDataById);
 timeSheetRouter.put("/view-time-sheets/:id", editDataById);
