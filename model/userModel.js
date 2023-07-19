@@ -67,7 +67,7 @@ const userSchema = mongoose.Schema({
   mailingAddress: {
     type: String,
   },
-  emailingAddressForSoftCopies: {
+  alternativeEmailAdress: {
     type: String,
   },
   filename: String,

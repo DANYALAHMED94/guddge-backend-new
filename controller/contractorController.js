@@ -21,7 +21,7 @@ const createContractor = async (req, res) => {
     identificationNumber,
     socialSecurityNumber,
     mailingAddress,
-    emailingAddressForSoftCopies,
+    alternativeEmailAdress,
   } = req.body;
   // console.log(req.body);
   const user = await User.findOne({ email: email });
@@ -40,7 +40,7 @@ const createContractor = async (req, res) => {
         socialSecurityNumber &&
         contractorRate &&
         mailingAddress &&
-        emailingAddressForSoftCopies)
+        alternativeEmailAdress)
     ) {
       const salt = await bcrypt.genSalt(10);
       const hashPassword = await bcrypt.hash(password, salt);
@@ -63,7 +63,7 @@ const createContractor = async (req, res) => {
           identificationNumber: identificationNumber,
           socialSecurityNumber: socialSecurityNumber,
           mailingAddress: mailingAddress,
-          emailingAddressForSoftCopies: emailingAddressForSoftCopies,
+          alternativeEmailAdress: alternativeEmailAdress,
           joiningDate: joiningDate,
         });
 

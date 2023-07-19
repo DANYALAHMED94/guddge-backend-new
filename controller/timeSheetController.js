@@ -339,10 +339,10 @@ const sheetRejectDecsById = async (req, res) => {
 };
 
 const allTimeSheetsReports = async (req, res) => {
-  const { contractor, date } = req.query;
+  const { contractor, date, category } = req.query;
+  console.log(contractor, date, category);
   try {
     const filter = {
-      // $or: [{ user: id }, { adminId: id }],
       status: "Approved",
     };
     if (contractor) {
@@ -353,7 +353,27 @@ const allTimeSheetsReports = async (req, res) => {
       filter.approvalDate = { $regex: date, $options: "i" };
     }
 
-    const data = await TimeSheet.find(filter);
+    // const data = await TimeSheet.find(filter);
+    const data = await TimeSheet.aggregate([
+      {
+        $match: {
+          $or: [
+            {
+              name: { $regex: contractor, $options: "i" },
+              approvalDate: `${date}`,
+              "dataSheet.invoiceCategory": { $regex: category, $options: "i" },
+            },
+          ],
+        },
+      },
+      { $unwind: "$dataSheet" },
+
+      {
+        $match: {
+          "dataSheet.invoiceCategory": { $regex: category, $options: "i" },
+        },
+      },
+    ]);
 
     res.status(200).json({
       success: true,
@@ -410,7 +430,7 @@ const allAdminDraft = async (req, res) => {
 
 const allAdminApproval = async (req, res) => {
   try {
-    const data = await TimeSheet.find({ status: "Approval" });
+    const data = await TimeSheet.find({ status: "Need approval" });
     res.status(200).json({
       success: true,
       message: "Approval",
