@@ -471,7 +471,7 @@ const allTimeSheetsReports = async (req, res) => {
           newRoot: "$document",
         },
       },
-    ]).sort({ timeSheetName: 1 });
+    ]).sort({ currentDate: -1 });
 
     res.status(200).json({
       success: true,

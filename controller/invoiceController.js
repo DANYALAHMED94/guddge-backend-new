@@ -45,7 +45,9 @@ const invoiceCreatedDate = async (req, res) => {
 };
 
 const allInvoiceReports = async (req, res) => {
-  const { client, status, date } = req.query;
+  const { client, status, startDate, endDate } = req.query;
+  // const startDate = "06/23/2023";
+  // const endDate = "06/27/2023";
   const filter = {};
   if (client) {
     filter.clientName = { $regex: contractor, $options: "i" };
@@ -53,11 +55,11 @@ const allInvoiceReports = async (req, res) => {
   if (status) {
     filter.status = status;
   }
-  if (date) {
-    filter.sharedDate = { $regex: date, $options: "i" };
+  if (startDate && endDate) {
+    filter.sharedDate = { $gte: startDate, $lte: endDate };
   }
   try {
-    const data = await Invoices.find(filter);
+    const data = await Invoices.find(filter).sort({ sharedDate: -1 });
     res.status(200).json({
       success: true,
       message: "All Invoices",

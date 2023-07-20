@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.61e250a5.css",
-    "main.js": "/static/js/main.9950b0ce.js",
+    "main.css": "/static/css/main.179b2a15.css",
+    "main.js": "/static/js/main.86a9ce3d.js",
     "static/js/787.57a85511.chunk.js": "/static/js/787.57a85511.chunk.js",
     "static/media/msoffice.svg": "/static/media/msoffice.761b135dd840eeea667e9b6fb968ae5b.svg",
     "static/media/Cyber.svg": "/static/media/Cyber.867fe45e100aab512311d6e078fe1cc0.svg",
@@ -23,12 +23,12 @@
     "static/media/plusIcon.svg": "/static/media/plusIcon.eee79109c3f1f4bb5efe9c8d41d98287.svg",
     "static/media/createTick.svg": "/static/media/createTick.622040249cb2966518ba8f556e2564fe.svg",
     "static/media/angleIcon.svg": "/static/media/angleIcon.87644a530bf742c6abc844e2d72c1f1e.svg",
-    "main.61e250a5.css.map": "/static/css/main.61e250a5.css.map",
-    "main.9950b0ce.js.map": "/static/js/main.9950b0ce.js.map",
+    "main.179b2a15.css.map": "/static/css/main.179b2a15.css.map",
+    "main.86a9ce3d.js.map": "/static/js/main.86a9ce3d.js.map",
     "787.57a85511.chunk.js.map": "/static/js/787.57a85511.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.61e250a5.css",
-    "static/js/main.9950b0ce.js"
+    "static/css/main.179b2a15.css",
+    "static/js/main.86a9ce3d.js"
   ]
 }
