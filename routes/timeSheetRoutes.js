@@ -19,9 +19,10 @@ import {
   getCategories,
 } from "../controller/timeSheetController.js";
 import express from "express";
+import { test } from "../controller/testController.js";
 
 const timeSheetRouter = express.Router();
-
+timeSheetRouter.get("/test", test);
 
 timeSheetRouter.post("/view-time-sheets", timeSheetData);
 timeSheetRouter.get("/timesheets/approval/:id", getTimeSheetData);

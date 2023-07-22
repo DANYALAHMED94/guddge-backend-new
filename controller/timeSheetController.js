@@ -456,7 +456,7 @@ const allTimeSheetsReports = async (req, res) => {
 
       {
         $match: {
-          "dataSheet.invoiceCategory": { $regex: category, $options: "i" },
+          "dataSheet.invoiceCategory": { $regex: `${category}`, $options: "i" },
         },
       },
       {
@@ -583,7 +583,7 @@ const getCategories = async (req, res) => {
   try {
     const data = await TimeSheet.aggregate([
       {
-        $unwind: "$dataSheet" , // Unwind the array into separate documents
+        $unwind: "$dataSheet", // Unwind the array into separate documents
       },
       {
         $group: {
