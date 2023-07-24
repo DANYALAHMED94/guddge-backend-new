@@ -10,7 +10,10 @@ const timeSheetSchema = mongoose.Schema({
   status: String,
   approvalDate: String,
   approvedBy: String,
+<<<<<<< HEAD
   desc: String,
+=======
+>>>>>>> 727bb02d12d77b898ffa648587d9150fb95dda6a
   dataSheet: [
     {
       changeDate: String,
@@ -22,7 +25,10 @@ const timeSheetSchema = mongoose.Schema({
       comments: String,
     },
   ],
+<<<<<<< HEAD
   miscellaneous: [{ date: String, reason: String, cost: String }],
+=======
+>>>>>>> 727bb02d12d77b898ffa648587d9150fb95dda6a
 });
 
 const TimeSheet = mongoose.model("timesheet", timeSheetSchema);
