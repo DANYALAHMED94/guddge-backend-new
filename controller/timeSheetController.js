@@ -339,119 +339,46 @@ const sheetRejectDecsById = async (req, res) => {
 };
 
 const allTimeSheetsReports = async (req, res) => {
-  const { contractor, date, category } = req.query;
-  const startDate = "";
-  const endDate = "";
-  // const matchQuery = {
-  //   status: "Approved",
-  //   $or: [
-  //     {
-  //       $and: [
-  //         { name: { $regex: `${contractor}`, $options: "i" } },
-  //         {
-  //           "dataSheet.invoiceCategory": {
-  //             $regex: `${category}`,
-  //             $options: "i",
-  //           },
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       $and: [
-  //         { name: { $exists: false } },
-  //         { "dataSheet.invoiceCategory": { $exists: false } },
-  //       ],
-  //     },
-  //   ],
-  // };
+  const { contractor, startDate, endDate, category, project, rate, hour, ID } =
+    req.query;
+  const filter = { status: "Approved" };
 
-  // // Check if startDate and endDate are provided, then add the approvalDate condition to the match query
-  // if (startDate && endDate) {
-  //   matchQuery.$or[0].$and.push({
-  //     approvalDate: { $gte: startDate, $lte: endDate },
-  //   });
-  // }
+  if (contractor) {
+    filter["name"] = { $regex: `${contractor}`, $options: "i" };
+  }
+
+  if (startDate && endDate) {
+    filter["approvalDate"] = { $gte: startDate, $lte: endDate };
+  }
+
+  if (category) {
+    filter["dataSheet.invoiceCategory"] = {
+      $regex: `${category}`,
+      $options: "i",
+    };
+  }
+
+  if (project) {
+    filter["dataSheet.project"] = { $regex: `${project}`, $options: "i" };
+  }
+
+  if (ID) {
+    filter["dataSheet.ID"] = ID;
+  }
+
+  if (hour) {
+    filter["dataSheet.hour"] = hour;
+  }
+
+  if (rate) {
+    filter["clientRate"] = rate;
+  }
+
   try {
     const data = await TimeSheet.aggregate([
-      // simple filter date
       {
-        $match: {
-          status: "Approved",
-          $or: [
-            {
-              $and: [
-                { name: { $regex: `${contractor}`, $options: "i" } },
-                { approvalDate: { $regex: `${date}`, $options: "i" } },
-                {
-                  "dataSheet.invoiceCategory": {
-                    $regex: `${category}`,
-                    $options: "i",
-                  },
-                },
-              ],
-            },
-            {
-              $and: [
-                { name: { $exists: false } },
-                { approvalDate: date },
-                { "dataSheet.invoiceCategory": { $exists: false } },
-              ],
-            },
-            {
-              $and: [
-                { name: { $exists: false } },
-                { approvalDate: { $exists: false } },
-                {
-                  "dataSheet.invoiceCategory": {
-                    $regex: `${category}`,
-                    $options: "i",
-                  },
-                },
-              ],
-            },
-          ],
-        },
+        $match: filter,
       },
-
-      // for date range
-      // {
-      //   $match: {
-      //     status: "Approved",
-      //     $or: [
-      //       {
-      //         $and: [
-      //           { name: { $regex: `${contractor}`, $options: "i" } },
-      //           { approvalDate: { $gte: startDate, $lte: endDate } },
-      //           {
-      //             "dataSheet.invoiceCategory": {
-      //               $regex: `${category}`,
-      //               $options: "i",
-      //             },
-      //           },
-      //         ],
-      //       },
-      //       {
-      //         $and: [
-      //           { name: { $exists: false } },
-      //           { approvalDate: { $gte: startDate, $lte: endDate } },
-      //           { "dataSheet.invoiceCategory": { $exists: false } },
-      //         ],
-      //       },
-      //       {
-      //         $and: [
-      //           { name: { $exists: false } },
-      //           { approvalDate: { $exists: false } },
-      //           {
-      //             "dataSheet.invoiceCategory": {
-      //               $regex: `${category}`,
-      //               $options: "i",
-      //             },
-      //           },
-      //         ],
-      //       },
-      //     ],
-      //   },
-      // },
       { $unwind: "$dataSheet" },
 
       {
@@ -475,7 +402,7 @@ const allTimeSheetsReports = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "All timesheets",
+      message: "All timesheets reports",
       data,
     });
   } catch (error) {
