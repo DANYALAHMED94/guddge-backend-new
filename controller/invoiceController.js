@@ -50,7 +50,7 @@ const allInvoiceReports = async (req, res) => {
   // const endDate = "06/27/2023";
   const filter = {};
   if (client) {
-    filter.clientName = { $regex: contractor, $options: "i" };
+    filter.clientName = { $regex: client, $options: "i" };
   }
   if (status) {
     filter.status = status;
