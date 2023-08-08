@@ -30,7 +30,7 @@ const Users = [
     name: "Arooj",
     email: "arooj@gmail.com",
     password: bcrypt.hashSync("123456", 10),
-    role: "Client",
+    role: "Contractor",
     clientRate: "60",
   },
 ];

@@ -121,6 +121,8 @@ const getDataById = async (req, res) => {
 const getApproved = async (req, res) => {
   const { id } = req.params;
   const { status, approvalDate, approvedBy } = req.body;
+  console.log(status);
+  const getIdValue = await TimeSheet.findById(id);
   try {
     await TimeSheet.findByIdAndUpdate(
       { _id: id },
@@ -128,6 +130,13 @@ const getApproved = async (req, res) => {
         status: status,
         approvalDate: approvalDate,
         approvedBy: approvedBy,
+        notify: {
+          case: status,
+          text: `Your Timesheet has been ${status}`,
+          open: false,
+          timesheetId: getIdValue._id,
+          user: getIdValue.user,
+        },
       }
     );
     if (status) {
@@ -552,6 +561,50 @@ const getCategories = async (req, res) => {
   }
 };
 
+const getNotify = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const data = await TimeSheet.find(
+      { "notify.user": id },
+      { notify: 1 }
+    ).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: "notification",
+      data,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something wents wrong!",
+    });
+  }
+};
+
+const openNotification = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const data = await TimeSheet.updateMany(
+      { "notify.user": id },
+      { "notify.open": true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "notification updated",
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something wents wrong!",
+    });
+  }
+};
+
 export {
   timeSheetData,
   getTimeSheetData,
@@ -571,4 +624,6 @@ export {
   allAdminApproved,
   allAdminRejected,
   getCategories,
+  getNotify,
+  openNotification,
 };

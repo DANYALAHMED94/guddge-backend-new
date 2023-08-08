@@ -17,6 +17,8 @@ import {
   allAdminApproved,
   allAdminRejected,
   getCategories,
+  getNotify,
+  openNotification,
 } from "../controller/timeSheetController.js";
 import express from "express";
 
@@ -29,6 +31,9 @@ timeSheetRouter.get("/timesheets-categories", getCategories);
 
 timeSheetRouter.get("/view-time-sheets/:id", getDataById);
 timeSheetRouter.put("/view-time-sheets/:id", editDataById);
+
+timeSheetRouter.get("/notify/:id", getNotify);
+timeSheetRouter.put("/notification-open/:id", openNotification);
 
 timeSheetRouter.delete("/timesheets/:id", sheetDeleteById);
 timeSheetRouter.get("/timesheets/draft/:id", allDraft);
