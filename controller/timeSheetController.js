@@ -1,10 +1,10 @@
 import TimeSheet from "../model/timeSheetModel.js";
 import User from "../model/userModel.js";
+import dotenv from "dotenv";
+dotenv.config({ path: "./sendgrid.env" });
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(
-  "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"
-);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const timeSheetData = async (req, res) => {
   if (req.body !== null && req.body !== undefined) {

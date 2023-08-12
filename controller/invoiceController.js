@@ -4,9 +4,7 @@ import nodemailer from "nodemailer";
 import XLSX from "xlsx";
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(
-  "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"
-);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const generateInvoice = async (req, res) => {
   if (req.body !== null && req.body !== undefined) {

@@ -1,11 +1,10 @@
 import User from "../model/userModel.js";
 import bcrypt from "bcrypt";
-import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config({ path: "./sendgrid.env" });
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(
-  "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"
-);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const createContractor = async (req, res) => {
   const password = generateRandomPassword(8);
