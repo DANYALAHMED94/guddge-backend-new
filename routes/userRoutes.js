@@ -12,16 +12,17 @@ import {
   findUserById,
 } from "../controller/userController.js";
 import express from "express";
+import checkAuthUser from "../middleware/authmiddleware.js";
 
 const router = express.Router();
 
 router.post("/register-by-email", Signup);
 router.post("/login-by-email", Login);
-router.get("/find-user-by-id/:id", findUserById);
-router.put("/edit-user/:id", editUser);
-router.post("/timesheet", LoginByMSOffice);
+router.get("/find-user-by-id/:id", checkAuthUser, findUserById);
+router.put("/edit-user/:id", checkAuthUser, editUser);
+router.post("/timesheet", checkAuthUser, LoginByMSOffice);
 router.get("/all-contractors", allContractors);
-router.put("/reset-password", changePasswordAndUpdate);
+router.put("/reset-password", checkAuthUser, changePasswordAndUpdate);
 router.get("/all-clients", allClients);
 router.get("/view-time-sheets", allAdmins);
 router.get("/client-rates", clientRates);

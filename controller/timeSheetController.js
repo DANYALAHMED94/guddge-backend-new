@@ -1,5 +1,10 @@
 import TimeSheet from "../model/timeSheetModel.js";
 import User from "../model/userModel.js";
+import sgMail from "@sendgrid/mail";
+
+sgMail.setApiKey(
+  "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"
+);
 
 const timeSheetData = async (req, res) => {
   if (req.body !== null && req.body !== undefined) {
@@ -120,9 +125,16 @@ const getDataById = async (req, res) => {
 
 const getApproved = async (req, res) => {
   const { id } = req.params;
-  const { status, approvalDate, approvedBy } = req.body;
-  console.log(status);
+  const projection = {
+    _id: 0, // 0 means don't include this field in the result
+    email: 1, // 1 means include this field in the result
+  };
+  const { status, approvalDate, approvedBy, desc } = req.body;
   const getIdValue = await TimeSheet.findById(id);
+  const allMails = await User.find({ role: "Admin" }, projection);
+  const emails = allMails.map((user) => user.email);
+  const contractor = await User.findById(getIdValue?.user);
+
   try {
     await TimeSheet.findByIdAndUpdate(
       { _id: id },
@@ -130,6 +142,7 @@ const getApproved = async (req, res) => {
         status: status,
         approvalDate: approvalDate,
         approvedBy: approvedBy,
+        desc: desc,
         notify: {
           case: status,
           text: `Your Timesheet has been ${status}`,
@@ -139,6 +152,12 @@ const getApproved = async (req, res) => {
         },
       }
     );
+    if (status !== "draft") {
+      sendMailToAdmins(status, emails);
+    }
+    if (status === "Approved" || status === "Rejected") {
+      sendMailToContractor(status, contractor?.email, desc);
+    }
     if (status) {
       res.status(200).json({
         success: true,
@@ -626,4 +645,61 @@ export {
   getCategories,
   getNotify,
   openNotification,
+};
+
+const sendMailToAdmins = async (status, emails) => {
+  const msg = {
+    to: [...emails],
+    from: {
+      name: "guddge",
+      email: "testuser@guddge.com",
+    }, // Use the email address or domain you verified above
+    subject: "You have Timesheet",
+    text: `Guddge timesheet ${status}`,
+    html: `<strong>Guddge timesheet ${status}</strong>`,
+  };
+  try {
+    sgMail.send(msg);
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+const sendMailToContractor = async (status, contractor, desc) => {
+  if (status === "Rejected") {
+    const msg = {
+      to: `${contractor}`,
+      from: {
+        name: "guddge",
+        email: "testuser@guddge.com",
+      }, // Use the email address or domain you verified above
+      subject: "Your Timesheet is rejected",
+      text: `Guddge timesheet ${status}`,
+      html: `<strong>Resaon: ${desc}</strong>`,
+    };
+    try {
+      sgMail.send(msg);
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  } else {
+    const msg = {
+      to: `${contractor}`,
+      from: {
+        name: "guddge",
+        email: "testuser@guddge.com",
+      }, // Use the email address or domain you verified above
+      subject: "You have Timesheet",
+      text: `Guddge timesheet ${status}`,
+      html: `<strong>Guddge timesheet ${status}</strong>`,
+    };
+    try {
+      sgMail.send(msg);
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  }
 };

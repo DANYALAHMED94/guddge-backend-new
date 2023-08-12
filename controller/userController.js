@@ -72,7 +72,7 @@ const Login = async (req, res) => {
             userId: user._id,
             name: user.name,
             email: user.email,
-            role: user.role,
+            role: user.role, 
             token: token,
           });
         } else {
@@ -316,9 +316,11 @@ const changePasswordAndUpdate = async (req, res) => {
           await User.findByIdAndUpdate(user[0]._id, {
             password: newHashPassword,
           });
+
           res.status(201).json({
             success: true,
             message: "Password Updated Successfully",
+            data,
           });
         } else {
           res.status(400).json({
@@ -348,8 +350,6 @@ const editUser = async (req, res) => {
   const {
     name,
     email,
-    oldPassword,
-    new_password,
     DOB,
     phoneNumber,
     jobTitle,
@@ -396,10 +396,11 @@ const editUser = async (req, res) => {
 
     try {
       await user.save();
-
+      const updatedUser = await User.findById(id).select("-password");
       res.status(200).json({
         success: true,
         message: "updated Successfully",
+        updatedUser,
       });
     } catch (error) {
       res.status(500).json({

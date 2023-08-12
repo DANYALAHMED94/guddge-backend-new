@@ -1,6 +1,11 @@
 import User from "../model/userModel.js";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
+
+sgMail.setApiKey(
+  "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"
+);
 
 const createContractor = async (req, res) => {
   const password = generateRandomPassword(8);
@@ -26,22 +31,7 @@ const createContractor = async (req, res) => {
   // console.log(req.body);
   const user = await User.findOne({ email: email });
   if (!user) {
-    if (
-      (name && email && password && jobTitle && phoneNumber,
-      DOB &&
-        joiningDate &&
-        totalYearExperince &&
-        guddgeEmailPlan &&
-        agreement &&
-        shore &&
-        agreementEndDate &&
-        companyName &&
-        identificationNumber &&
-        socialSecurityNumber &&
-        contractorRate &&
-        mailingAddress &&
-        alternativeEmailAdress)
-    ) {
+    if ((name && email && password && phoneNumber, shore && contractorRate)) {
       const salt = await bcrypt.genSalt(10);
       const hashPassword = await bcrypt.hash(password, salt);
       try {
@@ -142,29 +132,20 @@ const generateRandomPassword = (length) => {
 };
 
 const sendPasswordToUser = async (email, password) => {
-  // Create a Nodemailer transporter
-  const transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    auth: {
-      user: "guddgellc@gmail.com",
-      pass: "cFgSdZE1wYmPQ5kV",
-    },
-  });
-
-  // Compose the email message
-  const mailOptions = {
-    from: "guddge@gmail.com",
-    to: email,
-    subject: "Your Guddge App Password",
-    text: `Your new password is: ${password}`,
+  const msg = {
+    to: `${email}`,
+    from: {
+      name: "guddge",
+      email: "testuser@guddge.com",
+    }, // Use the email address or domain you verified above
+    subject: "Your Password for guddge app",
+    text: `${password}`,
+    html: `<strong>${password}</strong>`,
   };
-
-  // Send the email
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", info.response);
+    sgMail.send(msg);
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.log(error);
+    return error;
   }
 };

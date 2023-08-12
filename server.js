@@ -9,6 +9,7 @@ import clientRoute from "./routes/clientRoutes.js";
 import timeSheetRouter from "./routes/timeSheetRoutes.js";
 import eventRouter from "./routes/calendarEventRoutes.js";
 import invoiceRouter from "./routes/invoiceRoutes.js";
+import profileRoute from "./routes/userProfileUpload.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -31,6 +32,9 @@ app.use("/api", clientRoute);
 app.use("/api", timeSheetRouter);
 app.use("/api", eventRouter);
 app.use("/api", invoiceRouter);
+app.use(express.urlencoded({ extended: true, limit: "500mb" }));
+app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
+app.use("/api", profileRoute);
 
 if (process.env.NODE_ENV === "PRODUCTION") {
   app.use(express.static(path.join(__dirname, "./build")));

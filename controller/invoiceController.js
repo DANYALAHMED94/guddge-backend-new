@@ -2,6 +2,11 @@ import Invoices from "../model/generateInvioceModel.js";
 import User from "../model/userModel.js";
 import nodemailer from "nodemailer";
 import XLSX from "xlsx";
+import sgMail from "@sendgrid/mail";
+
+sgMail.setApiKey(
+  "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"
+);
 
 const generateInvoice = async (req, res) => {
   if (req.body !== null && req.body !== undefined) {
@@ -142,7 +147,7 @@ const sendMailToclient = async (req, res) => {
   const dataSheet = await Invoices.findById(id);
   const timeSheetName = dataSheet?.timeSheetName.trim();
   // const adminEmail = await User.findById(dataSheet.user, { email: 1 }); // adminEmail.email
-  // const clientEmail = await User.findById(dataSheet.clientId, { email: 1 }); // clientEmail.email
+  const clientEmail = await User.findById(dataSheet.clientId, { email: 1 }); // clientEmail.email
 
   const data = dataSheet?.dataSheet;
   const addObject = {
@@ -193,45 +198,9 @@ const sendMailToclient = async (req, res) => {
     type: "buffer",
     bookType: "xlsx",
   });
+  const fileBase64 = excelBuffer.toString("base64");
 
-  try {
-    // connect with the smtp
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      auth: {
-        user: "guddgellc@gmail.com",
-        pass: "cFgSdZE1wYmPQ5kV",
-      },
-    });
-    let info = await transporter.sendMail({
-      from: `"Arooj Ashiq 👻" <ashiqarooj846@gmail.com>`, // sender address
-      to: `arooj.fatima.31324@gmail.com`, // list of receivers
-      subject: "Hello Arooj", // Subject line
-      text: "Hello Again", // plain text body
-      html: "<b>guddge</b>", // html body
-      attachments: [
-        {
-          filename: `${timeSheetName}.xlsx`,
-          content: excelBuffer, // excelBuffer is the buffer containing the Excel file data
-        },
-      ],
-    });
-    if (info) {
-      // await Invoices.findByIdAndUpdate(id, { deliver: true });
-      res.status(200).json({
-        success: true,
-        message: "Sent b to client Successfully",
-        deliver: true,
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Something wents wrong!",
-    });
-  }
+  sendInvoiceToClient(fileBase64, clientEmail, timeSheetName);
 };
 
 export {
@@ -242,4 +211,30 @@ export {
   invoiceCreatedDate,
   changeStatus,
   sendMailToclient,
+};
+
+const sendInvoiceToClient = (file, mail, timeSheetName) => {
+  try {
+    const msg = {
+      to: `${mail}`,
+      from: {
+        name: "guddge",
+        email: "testuser@guddge.com",
+      }, // Use the email address or domain you verified above
+      subject: "Your invoice report",
+      text: `our invoice report`,
+      attachments: [
+        {
+          content: file,
+          filename: `${timeSheetName}.xlsx`,
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          disposition: "attachment",
+        },
+      ],
+    };
+    sgMail.send(msg);
+  } catch (error) {
+    console.log(error.message);
+    return error;
+  }
 };

@@ -12,7 +12,7 @@ import express from "express";
 const invoiceRouter = express.Router();
 
 invoiceRouter.post("/generate-invoice", generateInvoice);
-invoiceRouter.get("/send-mail-to-client/:id", sendMailToclient);
+invoiceRouter.post("/send-mail-to-client/:id", sendMailToclient);
 invoiceRouter.get("/invoice-reports", allInvoiceReports);
 invoiceRouter.delete("/invoice-report-delete/:id", invoiceDeleteById);
 invoiceRouter.get("/view-invoice/:id", getInvoiceById);

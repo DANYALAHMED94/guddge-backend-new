@@ -1,6 +1,10 @@
 import User from "../model/userModel.js";
 import bcrypt from "bcrypt";
-import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
+
+sgMail.setApiKey(
+  "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"
+);
 
 const createClient = async (req, res) => {
   const password = generateRandomPassword(8);
@@ -16,19 +20,10 @@ const createClient = async (req, res) => {
     clientRate,
     contractorId,
   } = req.body;
+
   const user = await User.findOne({ email: email });
   if (!user) {
-    if (
-      (name && email && phoneNumber,
-      DOB &&
-        identificationNumber &&
-        guddgeEmailPlan &&
-        companyName &&
-        password &&
-        clientRate &&
-        contractorId &&
-        socialSecurityNumber)
-    ) {
+    if (name && email && password && clientRate && contractorId) {
       const contractor = await User.findById(contractorId);
       const salt = await bcrypt.genSalt(10);
       const hashPassword = await bcrypt.hash(password, salt);
@@ -48,12 +43,11 @@ const createClient = async (req, res) => {
           role: "Client",
         });
 
-        const addContractor = await newUser.save();
-        sendPasswordToUser(addContractor?.email, password);
-
+        const addedUser = await newUser.save();
+        sendPasswordToUser(addedUser?.email, password);
         res.status(200).json({
           success: true,
-          message: "Client created successful",
+          message: "Admin created successful",
         });
       } catch (error) {
         console.log(error);
@@ -71,10 +65,11 @@ const createClient = async (req, res) => {
   } else {
     res.status(400).json({
       success: false,
-      message: "Client exist against this email",
+      message: "Admin already exist against this email",
     });
   }
 };
+
 const clientData = async (req, res) => {
   const { q } = req.query;
 
@@ -126,29 +121,20 @@ const generateRandomPassword = (length) => {
 };
 
 const sendPasswordToUser = async (email, password) => {
-  // Create a Nodemailer transporter
-  const transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    auth: {
-      user: "guddgellc@gmail.com",
-      pass: "cFgSdZE1wYmPQ5kV",
-    },
-  });
-
-  // Compose the email message
-  const mailOptions = {
-    from: "guddge@gmail.com",
-    to: email,
-    subject: "Your Guddge App Password",
-    text: `Your new password is: ${password}`,
+  const msg = {
+    to: `${email}`,
+    from: {
+      name: "guddge",
+      email: "testuser@guddge.com",
+    }, // Use the email address or domain you verified above
+    subject: "Your Password for guddge app",
+    text: `${password}`,
+    html: `<strong>${password}</strong>`,
   };
-
-  // Send the email
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", info.response);
+    sgMail.send(msg);
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.log(error);
+    return error;
   }
 };
