@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import sgMail from "@sendgrid/mail";
 
 sgMail.setApiKey(
-  "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"
+  "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"
 );
 
 const createContractor = async (req, res) => {
@@ -137,7 +137,7 @@ const sendPasswordToUser = async (email, password) => {
     to: `${email}`,
     from: {
       name: "guddge",
-      email: "ashiqarooj846@gmail.com",
+      email: "testuser@guddge.com",
     }, // Use the email address or domain you verified above
     subject: "Your Password for guddge app",
     text: `${password}`,

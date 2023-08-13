@@ -219,7 +219,7 @@ const sendInvoiceToClient = (file, mail, timeSheetName) => {
       to: `${mail}`,
       from: {
         name: "guddge",
-        email: "ashiqarooj846@gmail.com",
+        email: "testuser@guddge.com",
       }, // Use the email address or domain you verified above
       subject: "Your invoice report",
       text: `our invoice report`,
