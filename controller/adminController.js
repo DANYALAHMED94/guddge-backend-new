@@ -42,7 +42,7 @@ const createAdmin = async (req, res) => {
     } else {
       res.status(400).json({
         success: false,
-        message: "Please fill empty fields",
+        message: "Please fill empty fields ",
       });
     }
   } else {
