@@ -63,7 +63,7 @@ const Login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (user.email == email && isMatch) {
           const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "15 d",
+            expiresIn: "15d",
           });
 
           res.status(200).json({
@@ -72,7 +72,7 @@ const Login = async (req, res) => {
             userId: user._id,
             name: user.name,
             email: user.email,
-            role: user.role, 
+            role: user.role,
             token: token,
           });
         } else {

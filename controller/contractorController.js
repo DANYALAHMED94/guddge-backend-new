@@ -1,10 +1,12 @@
 import User from "../model/userModel.js";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-dotenv.config({ path: "./sendgrid.env" });
+// dotenv.config({ path: "./sendgrid.env" });
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(
+  "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"
+);
 
 const createContractor = async (req, res) => {
   const password = generateRandomPassword(8);
@@ -135,7 +137,7 @@ const sendPasswordToUser = async (email, password) => {
     to: `${email}`,
     from: {
       name: "guddge",
-      email: "testuser@guddge.com",
+      email: "ashiqarooj846@gmail.com",
     }, // Use the email address or domain you verified above
     subject: "Your Password for guddge app",
     text: `${password}`,

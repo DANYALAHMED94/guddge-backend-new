@@ -4,7 +4,9 @@ import nodemailer from "nodemailer";
 import XLSX from "xlsx";
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(
+  "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"
+);
 
 const generateInvoice = async (req, res) => {
   if (req.body !== null && req.body !== undefined) {
@@ -217,7 +219,7 @@ const sendInvoiceToClient = (file, mail, timeSheetName) => {
       to: `${mail}`,
       from: {
         name: "guddge",
-        email: "testuser@guddge.com",
+        email: "ashiqarooj846@gmail.com",
       }, // Use the email address or domain you verified above
       subject: "Your invoice report",
       text: `our invoice report`,

@@ -4,7 +4,9 @@ import dotenv from "dotenv";
 dotenv.config({ path: "./sendgrid.env" });
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(
+  "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"
+);
 
 const timeSheetData = async (req, res) => {
   if (req.body !== null && req.body !== undefined) {
@@ -649,10 +651,10 @@ export {
 
 const sendMailToAdmins = async (status, emails) => {
   const msg = {
-    to: [...emails],
+    to: `ashiqarooj846@gmail.com`,
     from: {
       name: "guddge",
-      email: "testuser@guddge.com",
+      email: "ashiqarooj846@gmail.com",
     }, // Use the email address or domain you verified above
     subject: "You have Timesheet",
     text: `Guddge timesheet ${status}`,
@@ -672,7 +674,7 @@ const sendMailToContractor = async (status, contractor, desc) => {
       to: `${contractor}`,
       from: {
         name: "guddge",
-        email: "testuser@guddge.com",
+        email: "ashiqarooj846@gmail.com",
       }, // Use the email address or domain you verified above
       subject: "Your Timesheet is rejected",
       text: `Guddge timesheet ${status}`,
@@ -689,7 +691,7 @@ const sendMailToContractor = async (status, contractor, desc) => {
       to: `${contractor}`,
       from: {
         name: "guddge",
-        email: "testuser@guddge.com",
+        email: "ashiqarooj846@gmail.com",
       }, // Use the email address or domain you verified above
       subject: "You have Timesheet",
       text: `Guddge timesheet ${status}`,
