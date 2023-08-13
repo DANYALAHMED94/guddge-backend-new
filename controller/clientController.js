@@ -1,6 +1,6 @@
 import User from "../model/userModel.js";
-import bcrypt from "bcrypt";
-import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+// import dotenv from "dotenv";
 // dotenv.config({ path: "./sendgrid.env" });
 import sgMail from "@sendgrid/mail";
 
