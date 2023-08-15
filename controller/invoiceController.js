@@ -1,12 +1,8 @@
 import Invoices from "../model/generateInvioceModel.js";
 import User from "../model/userModel.js";
-import nodemailer from "nodemailer";
 import XLSX from "xlsx";
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(
-  "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"
-);
 
 const generateInvoice = async (req, res) => {
   if (req.body !== null && req.body !== undefined) {
@@ -151,10 +147,10 @@ const sendMailToclient = async (req, res) => {
 
   const data = dataSheet?.dataSheet;
   const addObject = {
-    changeDate: `${dataSheet?.miscellaneous[0].date}`,
-    ID: `${dataSheet?.miscellaneous[0].reason}`,
-    hour: `${dataSheet?.miscellaneous[0].cost}`,
-    task: `${dataSheet?.total}`,
+    changeDate: `date ${dataSheet?.miscellaneous[0].date}`,
+    ID: `reason ${dataSheet?.miscellaneous[0].reason}`,
+    hour: `cost ${dataSheet?.miscellaneous[0].cost}`,
+    task: `total ${dataSheet?.total}`,
   };
   data.push(addObject);
 
@@ -214,9 +210,11 @@ export {
 };
 
 const sendInvoiceToClient = (file, mail, timeSheetName) => {
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
   try {
     const msg = {
-      to: `${mail}`,
+      to: `ashiqarooj846@gmail.com`,
       from: {
         name: "guddge",
         email: "testuser@guddge.com",

@@ -1,12 +1,6 @@
 import User from "../model/userModel.js";
 import bcrypt from "bcryptjs";
-// import dotenv from "dotenv";
-// dotenv.config({ path: "./sendgrid.env" });
 import sgMail from "@sendgrid/mail";
-
-sgMail.setApiKey(
-  "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"
-);
 
 const createContractor = async (req, res) => {
   const password = generateRandomPassword(8);
@@ -101,6 +95,7 @@ const contractorData = async (req, res) => {
     contractorRate: 1,
     phoneNumber: 1,
     identificationNumber: 1,
+    disable: 1,
   };
   try {
     const contractor = await User.find(filter, projection).sort({ name: 1 });
@@ -133,6 +128,7 @@ const generateRandomPassword = (length) => {
 };
 
 const sendPasswordToUser = async (email, password) => {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   const msg = {
     to: `${email}`,
     from: {

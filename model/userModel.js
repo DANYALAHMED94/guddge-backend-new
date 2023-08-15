@@ -73,6 +73,10 @@ const userSchema = mongoose.Schema({
   filename: String,
   clientRate: String,
   contractorRate: String,
+  disable: {
+    type: Boolean,
+    default: null,
+  },
 });
 
 const User = mongoose.model("User", userSchema);

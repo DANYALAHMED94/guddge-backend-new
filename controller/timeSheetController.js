@@ -4,10 +4,6 @@ import dotenv from "dotenv";
 dotenv.config({ path: "./sendgrid.env" });
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(
-  "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"
-);
-
 const timeSheetData = async (req, res) => {
   if (req.body !== null && req.body !== undefined) {
     try {
@@ -650,6 +646,7 @@ export {
 };
 
 const sendMailToAdmins = async (status, emails) => {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   const msg = {
     to: `${emails}`,
     from: {

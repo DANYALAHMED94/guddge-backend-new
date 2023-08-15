@@ -4,10 +4,6 @@ import bcrypt from "bcryptjs";
 // dotenv.config({ path: "./sendgrid.env" });
 import sgMail from "@sendgrid/mail";
 
-sgMail.setApiKey(
-  "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"
-);
-
 const createAdmin = async (req, res) => {
   const password = generateRandomPassword(8);
   const { name, email, phoneNumber, DOB } = req.body;
@@ -48,7 +44,7 @@ const createAdmin = async (req, res) => {
   } else {
     res.status(400).json({
       success: false,
-      message: "Admin already exist against this email",
+      message: "User already exist against this email",
     });
   }
 };
@@ -68,6 +64,7 @@ const generateRandomPassword = (length) => {
 };
 
 const sendPasswordToUser = async (email, password) => {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   const msg = {
     to: `${email}`,
     from: {

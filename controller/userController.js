@@ -73,6 +73,8 @@ const Login = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            filename: user.filename,
+            disable: user?.disable,
             token: token,
           });
         } else {
@@ -301,26 +303,26 @@ const allClients = async (req, res) => {
 };
 
 const changePasswordAndUpdate = async (req, res) => {
-  const { email, oldPassword, new_password } = req.body;
+  const { oldPassword, new_password } = req.body;
+  const { id } = req.params;
 
-  const user = await User.find({ email: email });
+  const user = await User.findById({ _id: id });
 
   if (user) {
-    const isMatch = await bcrypt.compare(oldPassword, user[0].password);
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
 
     if (isMatch) {
       try {
         if (oldPassword && new_password && oldPassword !== new_password) {
           const salt = await bcrypt.genSalt(10);
           const newHashPassword = await bcrypt.hash(new_password, salt);
-          await User.findByIdAndUpdate(user[0]._id, {
+          await User.findByIdAndUpdate(user._id, {
             password: newHashPassword,
           });
 
           res.status(201).json({
             success: true,
             message: "Password Updated Successfully",
-            data,
           });
         } else {
           res.status(400).json({
@@ -433,6 +435,25 @@ const findUserById = async (req, res) => {
   }
 };
 
+const disableUser = async (req, res) => {
+  const { disable } = req.body;
+  const { id } = req.params;
+  const user = await User.findById({ _id: id });
+
+  if (user) {
+    await User.findByIdAndUpdate({ _id: id }, { disable: disable });
+    res.status(200).json({
+      success: true,
+      message: "user disabled",
+    });
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "user not found",
+    });
+  }
+};
+
 export {
   Signup,
   Login,
@@ -446,4 +467,5 @@ export {
   changePasswordAndUpdate,
   editUser,
   findUserById,
+  disableUser,
 };
