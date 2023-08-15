@@ -3,7 +3,6 @@ import User from "../model/userModel.js";
 import XLSX from "xlsx";
 import sgMail from "@sendgrid/mail";
 
-
 const generateInvoice = async (req, res) => {
   if (req.body !== null && req.body !== undefined) {
     try {
@@ -195,8 +194,7 @@ const sendMailToclient = async (req, res) => {
     bookType: "xlsx",
   });
   const fileBase64 = excelBuffer.toString("base64");
-
-  sendInvoiceToClient(fileBase64, clientEmail, timeSheetName);
+  sendInvoiceToClient(fileBase64, clientEmail?.email, timeSheetName);
 };
 
 export {
@@ -210,26 +208,26 @@ export {
 };
 
 const sendInvoiceToClient = (file, mail, timeSheetName) => {
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+  const msg = {
+    to: `${mail}`,
+    from: {
+      name: "guddge",
+      email: "testuser@guddge.com",
+    }, // Use the email address or domain you verified above
+    subject: "Your invoice report",
+    text: `Your invoice report`,
+    attachments: [
+      {
+        content: file,
+        filename: `${timeSheetName}.xlsx`,
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        disposition: "attachment",
+      },
+    ],
+  };
   try {
-    const msg = {
-      to: `ashiqarooj846@gmail.com`,
-      from: {
-        name: "guddge",
-        email: "testuser@guddge.com",
-      }, // Use the email address or domain you verified above
-      subject: "Your invoice report",
-      text: `our invoice report`,
-      attachments: [
-        {
-          content: file,
-          filename: `${timeSheetName}.xlsx`,
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          disposition: "attachment",
-        },
-      ],
-    };
     sgMail.send(msg);
   } catch (error) {
     console.log(error.message);
