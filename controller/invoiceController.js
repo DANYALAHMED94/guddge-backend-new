@@ -216,8 +216,8 @@ const sendInvoiceToClient = (file, mail, timeSheetName) => {
       name: "guddge",
       email: "testuser@guddge.com",
     }, // Use the email address or domain you verified above
-    subject: "Your invoice report",
-    text: `Your invoice report`,
+    subject: "Please find your invoice in the attachment file below.",
+    text: `Please find your invoice in the attachment file below.`,
     attachments: [
       {
         content: file,

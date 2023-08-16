@@ -673,9 +673,10 @@ const sendMailToContractor = async (status, contractor, desc) => {
         name: "guddge",
         email: "testuser@guddge.com",
       }, // Use the email address or domain you verified above
-      subject: "Your Timesheet is rejected",
-      text: `Guddge timesheet ${status}`,
-      html: `<strong>Resaon: ${desc}</strong>`,
+      subject:
+        "Your time sheet has been rejected please login to the system and review the time sheet to make some improvements or create a new time sheet",
+      text: `Your time sheet has been rejected please login to the system and review the time sheet to make some improvements or create a new time sheet`,
+      html: `<strong>Reason for rejection: ${desc}</strong>`,
     };
     try {
       sgMail.send(msg);
