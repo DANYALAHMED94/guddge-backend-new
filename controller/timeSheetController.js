@@ -45,7 +45,7 @@ const getTimeSheetData = async (req, res) => {
         message: "all need approval sheets",
         data,
       });
-    } else if (user?.role === "Admin") {
+    } else if (user?.role === "Admin" || user?.role === "Super Admin") {
       const filter = {
         $or: [{ user: id }, { adminId: id }],
         status: "Need approval",
@@ -182,7 +182,7 @@ const allDraft = async (req, res) => {
   try {
     const user = await User.findById(id).sort({ currentDate: -1 });
 
-    if (user.role === "Contractor") {
+    if (user?.role === "Contractor") {
       const data = await TimeSheet.find(filter);
 
       res.status(200).json({
@@ -190,7 +190,7 @@ const allDraft = async (req, res) => {
         message: "draft",
         data,
       });
-    } else if (user.role === "Admin") {
+    } else if (user?.role === "Admin" || user?.role === "Super Admin" ) {
       const filter = {
         $or: [{ user: id }, { adminId: id }],
         status: "draft",
@@ -228,7 +228,7 @@ const allApproved = async (req, res) => {
         message: "all approved",
         data,
       });
-    } else if (user?.role === "Admin") {
+    } else if (user?.role === "Admin" || user?.role === "Super Admin") {
       const filter = {
         $or: [{ user: id }, { adminId: id }],
         status: "Approved",
@@ -265,7 +265,7 @@ const allRejected = async (req, res) => {
         message: "all Rejected",
         data,
       });
-    } else if (user?.role === "Admin") {
+    } else if (user?.role === "Admin" || user?.role === "Super Admin") {
       const filter = {
         $or: [{ user: id }, { adminId: id }],
         status: "Rejected",

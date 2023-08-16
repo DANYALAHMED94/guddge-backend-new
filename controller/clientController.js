@@ -42,7 +42,7 @@ const createClient = async (req, res) => {
         });
 
         const addedUser = await newUser.save();
-        sendPasswordToUser(addedUser?.email, password);
+        // sendPasswordToUser(addedUser?.email, password);
         res.status(200).json({
           success: true,
           message: "Admin created successful",
