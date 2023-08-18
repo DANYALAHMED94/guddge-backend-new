@@ -73,8 +73,12 @@ const sendPasswordToUser = async (email, password) => {
     }, // Use the email address or domain you verified above
     subject: "Here is your password for the guddge.",
     text: `${password}`,
-    html: `<h1><strong>Email:${email}</strong></h1>
-    <h1><strong>Password:${password}</strong></h1>`,
+    html: `<p>Welcome to Guddge</p>
+    <p>A new account has been created under your email address
+    Please follow the link at: http://timesheet.guddge.com </p>
+    <strong>Your username:${email}</strong>
+    <strong>Password:${password}</strong>
+    <strong>Please change your password after logging in Profile Setting.</strong>`,
   };
   try {
     sgMail.send(msg);

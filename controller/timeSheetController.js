@@ -154,7 +154,12 @@ const getApproved = async (req, res) => {
       sendMailToAdmins(status, emails);
     }
     if (status === "Approved" || status === "Rejected") {
-      sendMailToContractor(status, contractor?.email, desc);
+      sendMailToContractor(
+        status,
+        contractor?.email,
+        desc,
+        getIdValue?.timeSheetName
+      );
     }
     if (status) {
       res.status(200).json({
@@ -190,7 +195,7 @@ const allDraft = async (req, res) => {
         message: "draft",
         data,
       });
-    } else if (user?.role === "Admin" || user?.role === "Super Admin" ) {
+    } else if (user?.role === "Admin" || user?.role === "Super Admin") {
       const filter = {
         $or: [{ user: id }, { adminId: id }],
         status: "draft",
@@ -665,7 +670,12 @@ const sendMailToAdmins = async (status, emails) => {
   }
 };
 
-const sendMailToContractor = async (status, contractor, desc) => {
+const sendMailToContractor = async (
+  status,
+  contractor,
+  desc,
+  timeSheetName
+) => {
   if (status === "Rejected") {
     const msg = {
       to: `${contractor}`,
@@ -673,10 +683,9 @@ const sendMailToContractor = async (status, contractor, desc) => {
         name: "guddge",
         email: "testuser@guddge.com",
       }, // Use the email address or domain you verified above
-      subject:
-        "Your time sheet has been rejected please login to the system and review the time sheet to make some improvements or create a new time sheet",
+      subject: `Your timesheet ${timeSheetName} has been rejected`,
       text: `Your time sheet has been rejected please login to the system and review the time sheet to make some improvements or create a new time sheet`,
-      html: `<strong>Reason for rejection: ${desc}</strong>`,
+      html: `<strong>Reason for Rejection: ${desc}</strong>`,
     };
     try {
       sgMail.send(msg);
@@ -691,9 +700,9 @@ const sendMailToContractor = async (status, contractor, desc) => {
         name: "guddge",
         email: "testuser@guddge.com",
       }, // Use the email address or domain you verified above
-      subject: "You have Timesheet",
-      text: `Guddge timesheet ${status}`,
-      html: `<strong>Guddge timesheet ${status}</strong>`,
+      subject: `Your timesheet ${timeSheetName} has been Approved`,
+      text: `: Your timesheet ${timeSheetName} has been Approved.`,
+      html: `<strongYour timesheet ${timeSheetName} has been Approved.</strong>`,
     };
     try {
       sgMail.send(msg);

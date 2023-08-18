@@ -11,6 +11,7 @@ import {
   editUser,
   findUserById,
   disableUser,
+  deleteUser,
 } from "../controller/userController.js";
 import express from "express";
 import checkAuthUser from "../middleware/authmiddleware.js";
@@ -28,6 +29,7 @@ router.get("/all-clients", allClients);
 router.get("/view-time-sheets", allAdmins);
 router.get("/client-rates", clientRates);
 router.put("/disable-user/:id", disableUser);
+router.delete("/delete-user/:id", deleteUser);
 
 router.get("/all-users-date-of-birth", allUsersDateOfBirth);
 

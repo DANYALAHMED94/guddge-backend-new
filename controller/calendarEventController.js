@@ -54,7 +54,7 @@ const allCalendarEvent = async (req, res) => {
 
 const allHolidayEvent = async (req, res) => {
   try {
-    const allevents = await UserEvents.find({ color: "blue" });
+    const allevents = await UserEvents.find();
     res.status(200).json({
       success: false,
       message: "Event successfully added",

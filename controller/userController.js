@@ -454,6 +454,23 @@ const disableUser = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await User.deleteOne({ _id: id });
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    res.status(200).json({
+      success: false,
+      message: "Something wents wrong while deleting user",
+    });
+  }
+};
+
 export {
   Signup,
   Login,
@@ -468,4 +485,5 @@ export {
   editUser,
   findUserById,
   disableUser,
+  deleteUser,
 };
