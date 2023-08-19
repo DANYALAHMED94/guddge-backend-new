@@ -56,7 +56,6 @@ profileRoute.put(
           if (user?.filename?.length && filename?.length) {
             removeImage(user?.filename);
           }
-          // console.log("user.filename ", user.filename, filename);
           user.name = name || user.name;
           user.DOB = DOB || user.DOB;
           user.email = email || user.email;

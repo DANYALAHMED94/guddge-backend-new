@@ -1,6 +1,8 @@
 import User from "../model/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import sgMail from "@sendgrid/mail";
 
 const Signup = async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -464,13 +466,95 @@ const deleteUser = async (req, res) => {
       message: "User deleted successfully",
     });
   } catch (error) {
-    res.status(200).json({
+    res.status(400).json({
       success: false,
       message: "Something wents wrong while deleting user",
     });
   }
 };
 
+const deleteProfile = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findById(id);
+    if (user) {
+      fs.unlink("./uploads/" + user?.filename, async function (err) {
+        if (err && err.code == "ENOENT") {
+          // file doesn't exist
+          console.info("File doesn't exist, won't remove it.");
+        } else if (err) {
+          // other errors, e.g. maybe we don't have enough permission
+          console.error("Error occurred while trying to remove file");
+        } else {
+          console.info(`removed`);
+          // Update user schema to reflect that image was deleted
+          user.filename = null; // or "" if you want to set it to an empty string
+          await user.save();
+        }
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Profile picture deleted successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: "Something went wrong while deleting profile picture",
+    });
+  }
+};
+
+const forgetPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email: email });
+
+  if (user) {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    sendForgetPasswordLink(user, token);
+    res.status(200).json({
+      success: true,
+      message: "Mail send successfully",
+    });
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "Email Not Found",
+    });
+  }
+};
+
+const updateForgetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const { id } = jwt.verify(token, process.env.JWT_SECRET);
+  if (id) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(password, salt);
+
+      await User.findByIdAndUpdate(id, { password: hashPassword });
+      res.status(200).json({
+        success: true,
+        message: "Password Updated Successfully",
+      });
+    } catch {
+      res.status(400).json({
+        success: false,
+        message: "Something wents wrong",
+      });
+    }
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "Something wents wrong",
+    });
+  }
+};
 export {
   Signup,
   Login,
@@ -486,4 +570,27 @@ export {
   findUserById,
   disableUser,
   deleteUser,
+  deleteProfile,
+  forgetPassword,
+  updateForgetPassword,
+};
+
+const sendForgetPasswordLink = (user, token) => {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const msg = {
+    to: `${user?.email}`,
+    from: {
+      name: "guddge",
+      email: "testuser@guddge.com",
+    }, // Use the email address or domain you verified above
+    subject:
+      "Please find the link below and chnage your password. This link will expire in 1 hour.",
+    text: `http://timesheet.guddge.com/forget-password/${token}`,
+  };
+  try {
+    sgMail.send(msg);
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
 };

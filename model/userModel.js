@@ -70,7 +70,10 @@ const userSchema = mongoose.Schema({
   alternativeEmailAdress: {
     type: String,
   },
-  filename: String,
+  filename: {
+    type: String,
+    default: "/profile-dummy.jpg",
+  },
   clientRate: String,
   contractorRate: String,
   disable: {

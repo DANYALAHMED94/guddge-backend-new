@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.a939b5c3.css",
-    "main.js": "/static/js/main.d1c04cb5.js",
+    "main.js": "/static/js/main.ae585b77.js",
     "static/js/787.57a85511.chunk.js": "/static/js/787.57a85511.chunk.js",
     "static/media/msoffice.svg": "/static/media/msoffice.761b135dd840eeea667e9b6fb968ae5b.svg",
     "static/media/Cyber.svg": "/static/media/Cyber.867fe45e100aab512311d6e078fe1cc0.svg",
@@ -13,7 +13,6 @@
     "static/media/revicons.ttf": "/static/media/revicons.57fd05d4ae650374c8de.ttf",
     "static/media/revicons.woff": "/static/media/revicons.e8746a624ed098489406.woff",
     "static/media/curve.svg": "/static/media/curve.364cde1ea8cd33e042c2f34b830f3db5.svg",
-    "static/media/Vector.svg": "/static/media/Vector.242e2ec26c19dbb0259ba28bc2619a9a.svg",
     "static/media/editIcon.svg": "/static/media/editIcon.424d12dd887876fa0f02b5e3860282bf.svg",
     "static/media/bellIcon.svg": "/static/media/bellIcon.1076e0a88aaef92d2967fac7dda2055b.svg",
     "index.html": "/index.html",
@@ -25,11 +24,11 @@
     "static/media/createTick.svg": "/static/media/createTick.622040249cb2966518ba8f556e2564fe.svg",
     "static/media/angleIcon.svg": "/static/media/angleIcon.87644a530bf742c6abc844e2d72c1f1e.svg",
     "main.a939b5c3.css.map": "/static/css/main.a939b5c3.css.map",
-    "main.d1c04cb5.js.map": "/static/js/main.d1c04cb5.js.map",
+    "main.ae585b77.js.map": "/static/js/main.ae585b77.js.map",
     "787.57a85511.chunk.js.map": "/static/js/787.57a85511.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a939b5c3.css",
-    "static/js/main.d1c04cb5.js"
+    "static/js/main.ae585b77.js"
   ]
 }
