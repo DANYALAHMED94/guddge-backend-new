@@ -10,7 +10,7 @@ import timeSheetRouter from "./routes/timeSheetRoutes.js";
 import eventRouter from "./routes/calendarEventRoutes.js";
 import invoiceRouter from "./routes/invoiceRoutes.js";
 import profileRoute from "./routes/userProfileUpload.js";
-import pdfRoute from "./routes/agreementUpload.js";
+import pdfRoute from "./routes/createContractor.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -36,7 +36,7 @@ app.use("/api", eventRouter);
 app.use("/api", invoiceRouter);
 app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
-app.use("/pdfUploads", express.static(path.join(__dirname, "/pdfUploads")));
+app.use("/pdfuploads", express.static(path.join(__dirname, "/pdfuploads")));
 app.use("/api", profileRoute);
 app.use("/api", pdfRoute);
 

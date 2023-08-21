@@ -47,16 +47,13 @@ const userSchema = mongoose.Schema({
     type: String,
     trim: true,
   },
-  agreement: {
-    type: String,
-    trim: true,
-  },
+  agreement: String,
+
   agreementEndDate: {
     type: String,
   },
   shore: {
     type: String,
-    // required: true,
   },
   companyName: {
     type: String,

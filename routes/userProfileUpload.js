@@ -44,7 +44,7 @@ profileRoute.put(
     const { name, DOB, email } = req.body;
     const { id } = req.params;
     const filename = req?.file?.filename;
-    if (!name && !DOB && !email && !filename) {
+    if (!name && !DOB && !email && !agreement) {
       res.status(400).json({
         success: false,
         message: "please enter all fields",
