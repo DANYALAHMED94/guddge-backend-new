@@ -69,7 +69,7 @@ pdfRoute.post("/pdfupload", upload.single("agreement"), async (req, res) => {
           contractorRate: contractorRate,
           totalYearExperince: totalYearExperince,
           guddgeEmailPlan: guddgeEmailPlan,
-          agreement: req.file.path,
+          agreement: req?.file?.path,
           shore: shore,
           agreementEndDate: agreementEndDate,
           companyName: companyName,

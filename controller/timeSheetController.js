@@ -1,24 +1,49 @@
 import TimeSheet from "../model/timeSheetModel.js";
 import User from "../model/userModel.js";
-import dotenv from "dotenv";
-dotenv.config({ path: "./sendgrid.env" });
+import XLSX from "xlsx";
 import sgMail from "@sendgrid/mail";
 
 const timeSheetData = async (req, res) => {
+  const { status } = req.body;
+  const projection = {
+    _id: 0, // 0 means don't include this field in the result
+    email: 1, // 1 means include this field in the result
+  };
   if (req.body !== null && req.body !== undefined) {
-    try {
-      const dataTable = await TimeSheet.insertMany(req.body);
-      res.status(200).json({
-        success: true,
-        message: "Data submitted successfully",
-        dataTable,
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(404).json({
-        success: false,
-        message: "Something wents wrong",
-      });
+    if (status === "draft") {
+      try {
+        const dataTable = await TimeSheet.insertMany(req.body);
+
+        res.status(200).json({
+          success: true,
+          message: "Data submitted successfully",
+          dataTable,
+        });
+      } catch (error) {
+        console.log(error);
+        res.status(404).json({
+          success: false,
+          message: "Something wents wrong",
+        });
+      }
+    } else {
+      const allMails = await User.find({ role: "Admin" }, projection);
+      const emails = allMails.map((user) => user.email);
+      try {
+        const dataTable = await TimeSheet.insertMany(req.body);
+        generateExcelFile(status, dataTable[0], emails);
+        res.status(200).json({
+          success: true,
+          message: "Data submitted successfully",
+          dataTable,
+        });
+      } catch (error) {
+        console.log(error);
+        res.status(404).json({
+          success: false,
+          message: "Something wents wrong",
+        });
+      }
     }
   } else {
     res.status(404).json({
@@ -133,33 +158,65 @@ const getApproved = async (req, res) => {
   const emails = allMails.map((user) => user.email);
   const contractor = await User.findById(getIdValue?.user);
   try {
-    await TimeSheet.findByIdAndUpdate(
-      { _id: id },
-      {
-        status: status,
-        approvalDate: approvalDate,
-        approvedBy: approvedBy,
-        desc: desc,
-        notify: {
-          case: status,
-          text: `Your Timesheet has been ${status}`,
-          open: false,
-          timesheetId: getIdValue._id,
-          user: getIdValue.user,
-        },
-      }
-    );
-    if (status !== "draft") {
-      sendMailToAdmins(status, emails);
-    }
-    if (status === "Approved" || status === "Rejected") {
-      sendMailToContractor(
-        status,
-        contractor?.email,
-        desc,
-        getIdValue?.timeSheetName
+    if (status === "Need approval") {
+      const timesheet = await TimeSheet.findByIdAndUpdate(
+        { _id: id },
+        {
+          status: status,
+          approvalDate: approvalDate,
+          approvedBy: approvedBy,
+          desc: desc,
+          notify: {
+            case: status,
+            open: false,
+            text: `Your have submitted Timesheet for Approval`,
+            timesheetId: getIdValue._id,
+            user: getIdValue.user,
+          },
+        }
       );
+
+      if (status !== "draft") {
+        generateExcelFile(status, timesheet, emails);
+      }
+      if (status === "Approved" || status === "Rejected") {
+        sendMailToContractor(
+          status,
+          contractor?.email,
+          desc,
+          getIdValue?.timeSheetName
+        );
+      }
+    } else {
+      const timesheet = await TimeSheet.findByIdAndUpdate(
+        { _id: id },
+        {
+          status: status,
+          approvalDate: approvalDate,
+          approvedBy: approvedBy,
+          desc: desc,
+          notify: {
+            case: status,
+            text: `Your Timesheet has been ${status}`,
+            open: false,
+            timesheetId: getIdValue._id,
+            user: getIdValue.user,
+          },
+        }
+      );
+      if (status !== "draft") {
+        generateExcelFile(status, timesheet, emails);
+      }
+      if (status === "Approved" || status === "Rejected") {
+        sendMailToContractor(
+          status,
+          contractor?.email,
+          desc,
+          getIdValue?.timeSheetName
+        );
+      }
     }
+
     if (status) {
       res.status(200).json({
         success: true,
@@ -649,7 +706,7 @@ export {
   openNotification,
 };
 
-const sendMailToAdmins = async (status, emails) => {
+const sendMailToAdmins = async (status, emails, file, timeSheetName) => {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   const msg = {
     to: [...emails],
@@ -657,9 +714,17 @@ const sendMailToAdmins = async (status, emails) => {
       name: "guddge",
       email: "testuser@guddge.com",
     }, // Use the email address or domain you verified above
-    subject: "You have Timesheet",
+    subject: "You have  Timesheet",
     text: `Guddge timesheet ${status}`,
     html: `<strong>Guddge timesheet ${status}</strong>`,
+    attachments: [
+      {
+        content: file,
+        filename: `${timeSheetName}.xlsx`,
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        disposition: "attachment",
+      },
+    ],
   };
   try {
     sgMail.send(msg);
@@ -675,6 +740,8 @@ const sendMailToContractor = async (
   desc,
   timeSheetName
 ) => {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
   if (status === "Rejected") {
     const msg = {
       to: `${contractor}`,
@@ -710,4 +777,59 @@ const sendMailToContractor = async (
       return error;
     }
   }
+};
+
+const generateExcelFile = async (status, timesheet, emails) => {
+  const dataSheet = await TimeSheet.findById(timesheet._id);
+  const data = dataSheet?.dataSheet;
+  const addObject = {
+    changeDate: `date ${dataSheet?.miscellaneous[0].date}`,
+    ID: `reason ${dataSheet?.miscellaneous[0].reason}`,
+    hour: `cost ${dataSheet?.miscellaneous[0].cost}`,
+    task: `total ${dataSheet?.total}`,
+  };
+  data?.push(addObject);
+
+  const parsedData = data?.map((obj) => {
+    delete obj._id;
+    const objString = JSON.stringify(obj);
+    const validJSONString = objString.replace(
+      /(['"])?([a-zA-Z0-9_]+)(['"])?:/g,
+      '"$2": '
+    );
+    return JSON.parse(validJSONString);
+  });
+  // Extract the column names
+  const columns = Object.keys(parsedData[0]);
+
+  // Create the data array in tabular format
+  const dataArray = [];
+  dataArray.push(columns); // Add the column headers as the first row
+  parsedData.forEach((obj) => {
+    const row = columns.map((key) => obj[key]);
+    dataArray.push(row);
+  });
+
+  const workbook = XLSX.utils.book_new();
+
+  const worksheet = XLSX.utils.aoa_to_sheet(dataArray, {
+    header: [
+      "changedate",
+      "ID",
+      "hour",
+      " invoiceCategory",
+      "project",
+      "task",
+      "rate",
+      "comments",
+    ],
+  });
+  XLSX.utils.book_append_sheet(workbook, worksheet, "excel");
+
+  const excelBuffer = XLSX.write(workbook, {
+    type: "buffer",
+    bookType: "xlsx",
+  });
+  const fileBase64 = excelBuffer.toString("base64");
+  sendMailToAdmins(status, emails, fileBase64, timesheet?.timeSheetName);
 };
