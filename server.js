@@ -11,6 +11,7 @@ import eventRouter from "./routes/calendarEventRoutes.js";
 import invoiceRouter from "./routes/invoiceRoutes.js";
 import profileRoute from "./routes/userProfileUpload.js";
 import pdfRoute from "./routes/createContractor.js";
+import editPdfRoute from "./routes/editContractorRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -39,6 +40,7 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 app.use("/pdfuploads", express.static(path.join(__dirname, "/pdfuploads")));
 app.use("/api", profileRoute);
 app.use("/api", pdfRoute);
+app.use("/api", editPdfRoute);
 
 if (process.env.NODE_ENV === "PRODUCTION") {
   app.use(express.static(path.join(__dirname, "./build")));

@@ -132,7 +132,6 @@ const getApproved = async (req, res) => {
   const allMails = await User.find({ role: "Admin" }, projection);
   const emails = allMails.map((user) => user.email);
   const contractor = await User.findById(getIdValue?.user);
-
   try {
     await TimeSheet.findByIdAndUpdate(
       { _id: id },
@@ -653,7 +652,7 @@ export {
 const sendMailToAdmins = async (status, emails) => {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   const msg = {
-    to: `${emails}`,
+    to: [...emails],
     from: {
       name: "guddge",
       email: "testuser@guddge.com",

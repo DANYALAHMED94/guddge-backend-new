@@ -50,7 +50,6 @@ pdfRoute.post("/pdfupload", upload.single("agreement"), async (req, res) => {
     mailingAddress,
     alternativeEmailAdress,
   } = req.body;
-  const agreement = req?.file?.agreement;
 
   const user = await User.findOne({ email: email });
 
@@ -82,7 +81,7 @@ pdfRoute.post("/pdfupload", upload.single("agreement"), async (req, res) => {
         });
 
         const addContractor = await newUser.save();
-        // sendPasswordToUser(addContractor?.email, password);
+        sendPasswordToUser(addContractor?.email, password);
         res.status(200).json({
           success: true,
           message: "Contractor created successful",
