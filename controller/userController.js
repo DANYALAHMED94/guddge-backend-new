@@ -555,6 +555,34 @@ const updateForgetPassword = async (req, res) => {
     });
   }
 };
+
+const updatePasswordById = async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+  const user = await User.findById(id);
+  if (user) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(password, salt);
+
+      await User.findByIdAndUpdate(id, { password: hashPassword });
+      res.status(200).json({
+        success: true,
+        message: "Password Updated Successfully",
+      });
+    } catch {
+      res.status(400).json({
+        success: false,
+        message: "Something wents wrong while updating password",
+      });
+    }
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+};
 export {
   Signup,
   Login,
@@ -573,6 +601,7 @@ export {
   deleteProfile,
   forgetPassword,
   updateForgetPassword,
+  updatePasswordById,
 };
 
 const sendForgetPasswordLink = (user, token) => {

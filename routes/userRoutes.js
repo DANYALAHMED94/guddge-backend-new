@@ -15,6 +15,7 @@ import {
   deleteProfile,
   forgetPassword,
   updateForgetPassword,
+  updatePasswordById,
 } from "../controller/userController.js";
 import express from "express";
 import checkAuthUser from "../middleware/authmiddleware.js";
@@ -27,6 +28,7 @@ router.post("/forget-password", forgetPassword);
 router.post("/forget-password/:token", updateForgetPassword);
 router.get("/find-user-by-id/:id", checkAuthUser, findUserById);
 router.put("/edit-user/:id", checkAuthUser, editUser);
+router.put("/update-password-by-id/:id", updatePasswordById);
 router.post("/timesheet", checkAuthUser, LoginByMSOffice);
 router.get("/all-contractors", allContractors);
 router.put("/reset-password/:id", checkAuthUser, changePasswordAndUpdate);
