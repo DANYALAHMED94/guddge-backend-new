@@ -13,7 +13,6 @@ const timeSheetData = async (req, res) => {
     if (status === "draft") {
       try {
         const dataTable = await TimeSheet.insertMany(req.body);
-
         res.status(200).json({
           success: true,
           message: "Data submitted successfully",
@@ -644,7 +643,7 @@ const getNotify = async (req, res) => {
   try {
     const data = await TimeSheet.find(
       { "notify.user": id },
-      { notify: 1 }
+      { notify: 1, createdAt: 1 }
     ).sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -706,7 +705,12 @@ export {
   openNotification,
 };
 
-const sendMailToAdmins = async (status, emails, file, timeSheetName) => {
+const sendMailToAdmins = async (
+  emails,
+  file,
+  timeSheetName,
+  contractorName
+) => {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   const msg = {
     to: [...emails],
@@ -715,8 +719,8 @@ const sendMailToAdmins = async (status, emails, file, timeSheetName) => {
       email: "testuser@guddge.com",
     }, // Use the email address or domain you verified above
     subject: "You have  Timesheet",
-    text: `Guddge timesheet ${status}`,
-    html: `<strong>Guddge timesheet ${status}</strong>`,
+    text: `A new time sheet has been submitted by ${contractorName}`,
+    html: `<strong>A new time sheet has been submitted by  ${contractorName}</strong>`,
     attachments: [
       {
         content: file,
@@ -780,7 +784,10 @@ const sendMailToContractor = async (
 };
 
 const generateExcelFile = async (status, timesheet, emails) => {
-  const dataSheet = await TimeSheet.findById(timesheet._id);
+  const dataSheet = await TimeSheet.findById(timesheet._id, {
+    "dataSheet._id": 0,
+  });
+  const contractor = await User.findById(timesheet?.user);
   const data = dataSheet?.dataSheet;
   const addObject = {
     changeDate: `date ${dataSheet?.miscellaneous[0].date}`,
@@ -831,5 +838,10 @@ const generateExcelFile = async (status, timesheet, emails) => {
     bookType: "xlsx",
   });
   const fileBase64 = excelBuffer.toString("base64");
-  sendMailToAdmins(status, emails, fileBase64, timesheet?.timeSheetName);
+  sendMailToAdmins(
+    emails,
+    fileBase64,
+    timesheet?.timeSheetName,
+    contractor?.name
+  );
 };
