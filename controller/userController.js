@@ -82,13 +82,14 @@ const Login = async (req, res) => {
         } else {
           res.status(400).json({
             success: false,
-            message: "email and password is not matched",
+            message:
+              "Wrong Username/Password. Try again or click forgot password to reset it.",
           });
         }
       } else {
         res.status(400).json({
           success: false,
-          message: "User is not registered",
+          message: "the user is not registered",
         });
       }
     } else {
@@ -517,7 +518,8 @@ const forgetPassword = async (req, res) => {
     sendForgetPasswordLink(user, token);
     res.status(200).json({
       success: true,
-      message: "Mail send successfully",
+      message:
+        "Email Sent. Please check your email for password reset instructions",
     });
   } else {
     res.status(400).json({
@@ -612,9 +614,14 @@ const sendForgetPasswordLink = (user, token) => {
       name: "guddge",
       email: "testuser@guddge.com",
     }, // Use the email address or domain you verified above
-    subject:
-      "Please find the link below and chnage your password. This link will expire in 1 hour.",
-    text: `http://timesheet.guddge.com/forget-password/${token}`,
+    subject: "Password Reset Request.",
+    text: `Reset your password?`,
+    html: `<p>If you requested a password reset for ${user?.email}, click the button below. This link will expire in 1 hour. If you didn’t make this request, please ignore and contact your administrator.</p> 
+    <a href=http://timesheet.guddge.com/forget-password/${token} style="text-decoration: none;">
+    <button style="background-color: blue; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+        Click here
+    </button>
+</a>`,
   };
   try {
     sgMail.send(msg);
