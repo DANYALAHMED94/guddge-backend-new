@@ -373,24 +373,48 @@ const sheetDeleteById = async (req, res) => {
 const editDataById = async (req, res) => {
   const { currentDate, timeSheetName, dataSheet } = req.body;
   const { id } = req.params;
-  try {
-    await TimeSheet.findByIdAndUpdate(
-      { _id: id },
-      {
-        timeSheetName: timeSheetName,
-        currentDate: currentDate,
-        dataSheet: dataSheet,
-      }
-    );
-    res.status(200).json({
-      success: true,
-      message: "Successfully Updated",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Something wents wrong!",
-    });
+  const sheet = await TimeSheet.findById(id);
+  if (sheet?.status === "Rejected") {
+    try {
+      await TimeSheet.findByIdAndUpdate(
+        { _id: id },
+        {
+          timeSheetName: timeSheetName,
+          currentDate: currentDate,
+          status: "Need approval",
+          dataSheet: dataSheet,
+        }
+      );
+      res.status(200).json({
+        success: true,
+        message: "Successfully Updated",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Something wents wrong!",
+      });
+    }
+  } else {
+    try {
+      await TimeSheet.findByIdAndUpdate(
+        { _id: id },
+        {
+          timeSheetName: timeSheetName,
+          currentDate: currentDate,
+          dataSheet: dataSheet,
+        }
+      );
+      res.status(200).json({
+        success: true,
+        message: "Successfully Updated",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Something wents wrong!",
+      });
+    }
   }
 };
 
@@ -718,7 +742,7 @@ const sendMailToAdmins = async (
       name: "guddge",
       email: "testuser@guddge.com",
     }, // Use the email address or domain you verified above
-    subject: "You have  Timesheet",
+    subject: `A new time sheet has been submitted by ${contractorName}`,
     text: `A new time sheet has been submitted by ${contractorName}`,
     html: `<strong>A new time sheet has been submitted by  ${contractorName}</strong>`,
     attachments: [
@@ -790,9 +814,9 @@ const generateExcelFile = async (status, timesheet, emails) => {
   const contractor = await User.findById(timesheet?.user);
   const data = dataSheet?.dataSheet;
   const addObject = {
-    changeDate: `date ${dataSheet?.miscellaneous[0].date}`,
-    ID: `reason ${dataSheet?.miscellaneous[0].reason}`,
-    hour: `cost ${dataSheet?.miscellaneous[0].cost}`,
+    changeDate: ``,
+    ID: ``,
+    hour: ``,
     task: `total ${dataSheet?.total}`,
   };
   data?.push(addObject);

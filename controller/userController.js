@@ -30,7 +30,7 @@ const Signup = async (req, res) => {
         const token = jwt.sign(
           { userId: saveUser._id },
           process.env.JWT_SECRET,
-          { expiresIn: "100d" }
+          { expiresIn: Math.floor(Date.now() / 1000) + 30 * 60 }
         );
         res.status(200).json({
           success: true,
@@ -65,12 +65,12 @@ const Login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (user.email == email && isMatch) {
           const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "15d",
+            expiresIn: "30s",
           });
 
           res.status(200).json({
             success: true,
-            message: "Logedin Successfully",
+            message: "Sign in successful",
             userId: user._id,
             name: user.name,
             email: user.email,
@@ -100,6 +100,32 @@ const Login = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json(error.message);
+  }
+};
+
+const session = async (req, res) => {
+  const { token } = req.params;
+  try {
+    const user = jwt.verify(token, process.env.JWT_SECRET, (err, res) => {
+      if (err) {
+        return "token expired";
+      }
+      return res;
+    });
+
+    if (user == "token expired") {
+      return res.json({ status: "error", data: "token expired" });
+    }
+
+    User.findById(user?.userId)
+      .then((data) => {
+        res.json({ status: true, data: data });
+      })
+      .catch((error) => {
+        res.json({ status: false, data: error });
+      });
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -196,7 +222,6 @@ const allUsersDateOfBirth = async (req, res) => {
     name: 1,
     role: 1,
     DOB: 1,
-    filename: 1,
   };
   const filter = {
     $or: [
@@ -604,6 +629,7 @@ export {
   forgetPassword,
   updateForgetPassword,
   updatePasswordById,
+  session,
 };
 
 const sendForgetPasswordLink = (user, token) => {

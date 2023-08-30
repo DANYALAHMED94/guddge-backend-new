@@ -16,6 +16,7 @@ import {
   forgetPassword,
   updateForgetPassword,
   updatePasswordById,
+  session,
 } from "../controller/userController.js";
 import express from "express";
 import checkAuthUser from "../middleware/authmiddleware.js";
@@ -24,6 +25,7 @@ const router = express.Router();
 
 router.post("/register-by-email", Signup);
 router.post("/login-by-email", Login);
+router.post("/user/:token", session);
 router.post("/forget-password", forgetPassword);
 router.post("/forget-password/:token", updateForgetPassword);
 router.get("/find-user-by-id/:id", checkAuthUser, findUserById);
