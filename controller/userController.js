@@ -65,7 +65,7 @@ const Login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (user.email == email && isMatch) {
           const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "30s",
+            expiresIn: "30m",
           });
 
           res.status(200).json({
@@ -197,7 +197,7 @@ const allAdmins = async (req, res) => {
       { name: { $regex: q, $options: "i" } },
       { email: { $regex: q, $options: "i" } },
     ],
-    role: "Admin",
+    role: { $in: ["Admin", "Super Admin"] },
   };
 
   try {
@@ -401,6 +401,8 @@ const editUser = async (req, res) => {
 
   const user = await User.findById(id);
   if (user) {
+    const salt = await bcrypt.genSalt(10);
+
     (user.name = name || user.name),
       (user.email = email || user.email),
       (user.DOB = DOB || user.DOB),

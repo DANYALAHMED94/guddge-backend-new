@@ -146,9 +146,9 @@ const sendMailToclient = async (req, res) => {
 
   const data = dataSheet?.dataSheet;
   const addObject = {
-    changeDate: `date ${dataSheet?.miscellaneous[0].date}`,
-    ID: `reason ${dataSheet?.miscellaneous[0].reason}`,
-    hour: `cost ${dataSheet?.miscellaneous[0].cost}`,
+    changeDate: `date ${dataSheet?.miscellaneous[0]?.date}`,
+    ID: `reason ${dataSheet?.miscellaneous[0]?.reason}`,
+    hour: `cost ${dataSheet?.miscellaneous[0]?.cost}`,
     task: `total ${dataSheet?.total}`,
   };
   data.push(addObject);

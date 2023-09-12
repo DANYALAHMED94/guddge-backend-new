@@ -57,6 +57,7 @@ pdfRoute.post("/pdfupload", upload.single("agreement"), async (req, res) => {
     if (name && email && password && phoneNumber && shore && contractorRate) {
       const salt = await bcrypt.genSalt(10);
       const hashPassword = await bcrypt.hash(password, salt);
+
       try {
         const newUser = new User({
           name: name,
@@ -73,8 +74,12 @@ pdfRoute.post("/pdfupload", upload.single("agreement"), async (req, res) => {
           shore: shore,
           agreementEndDate: agreementEndDate,
           companyName: companyName,
-          identificationNumber: identificationNumber,
-          socialSecurityNumber: socialSecurityNumber,
+          identificationNumber: identificationNumber
+            ? await encrypt(identificationNumber)
+            : identificationNumber,
+          socialSecurityNumber: socialSecurityNumber
+            ? await encrypt(socialSecurityNumber)
+            : socialSecurityNumber,
           mailingAddress: mailingAddress,
           alternativeEmailAdress: alternativeEmailAdress,
           joiningDate: joiningDate,
@@ -140,4 +145,10 @@ const sendPasswordToUser = async (email, password) => {
     console.log(error);
     return error;
   }
+};
+
+const encrypt = async (text) => {
+  const salt = await bcrypt.genSalt(16);
+  const hashdata = await bcrypt.hash(text, salt);
+  return hashdata;
 };

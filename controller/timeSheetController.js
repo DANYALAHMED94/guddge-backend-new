@@ -1,7 +1,9 @@
 import TimeSheet from "../model/timeSheetModel.js";
 import User from "../model/userModel.js";
+import mongoose from "mongoose";
 import XLSX from "xlsx";
 import sgMail from "@sendgrid/mail";
+const ObjectId = mongoose.Types.ObjectId;
 
 const timeSheetData = async (req, res) => {
   const { status } = req.body;
@@ -130,10 +132,12 @@ const shareWithGuddge = async (req, res) => {
 const getDataById = async (req, res) => {
   const { id } = req.params;
   try {
-    const data = await TimeSheet.findById(id).sort({ currentDate: -1 });
+    const data = await TimeSheet.findById(id, {
+      "dataSheet._id": 0,
+    }).sort({ currentDate: -1 });
     res.status(200).json({
       success: true,
-      message: "shared",
+      message: "data by id",
       data,
     });
   } catch (error) {
@@ -147,15 +151,26 @@ const getDataById = async (req, res) => {
 
 const getApproved = async (req, res) => {
   const { id } = req.params;
+
   const projection = {
     _id: 0, // 0 means don't include this field in the result
     email: 1, // 1 means include this field in the result
   };
   const { status, approvalDate, approvedBy, desc } = req.body;
+
   const getIdValue = await TimeSheet.findById(id);
   const allMails = await User.find({ role: "Admin" }, projection);
   const emails = allMails.map((user) => user.email);
   const contractor = await User.findById(getIdValue?.user);
+  const userIds = await User.find(
+    { role: { $in: ["Admin", "Super Admin"] } },
+    "_id"
+  );
+  const notificationUsers = userIds.map((id) => ({
+    userId: id,
+    acknowledged: false,
+  }));
+
   try {
     if (status === "Need approval") {
       const timesheet = await TimeSheet.findByIdAndUpdate(
@@ -170,7 +185,9 @@ const getApproved = async (req, res) => {
             open: false,
             text: `Your have submitted Timesheet for Approval`,
             timesheetId: getIdValue._id,
-            user: getIdValue.user,
+            contractorId: getIdValue.user,
+            users: notificationUsers,
+            message: `A new time sheet has been submitted by ${contractor?.name}`,
           },
         }
       );
@@ -199,7 +216,9 @@ const getApproved = async (req, res) => {
             text: `Your Timesheet has been ${status}`,
             open: false,
             timesheetId: getIdValue._id,
-            user: getIdValue.user,
+            contractorId: getIdValue.user,
+            users: notificationUsers,
+            message: `A new time sheet has been submitted by ${contractor?.name}`,
           },
         }
       );
@@ -449,16 +468,38 @@ const sheetRejectDecsById = async (req, res) => {
 };
 
 const allTimeSheetsReports = async (req, res) => {
-  const { contractor, startDate, endDate, category, project, rate, hour, ID } =
-    req.query;
+  const {
+    contractor,
+    startDate,
+    endDate,
+    category,
+    project,
+    rate,
+    hour,
+    ID,
+    timesheetCreateAtStart,
+    timesheetCreateAtEnd,
+    task,
+  } = req.query;
   const filter = { status: "Approved" };
-
+  let filterConditions = {};
   if (contractor) {
     filter["name"] = { $regex: `${contractor}`, $options: "i" };
   }
 
-  if (startDate && endDate) {
+  if (startDate || endDate) {
     filter["approvalDate"] = { $gte: startDate, $lte: endDate };
+  }
+  if (timesheetCreateAtStart) {
+    filterConditions["$gte"] = new Date(timesheetCreateAtStart);
+  }
+
+  if (timesheetCreateAtEnd) {
+    filterConditions["$lte"] = new Date(timesheetCreateAtEnd);
+  }
+
+  if (Object.keys(filterConditions)?.length > 0) {
+    filter["createdAt"] = filterConditions;
   }
 
   if (category) {
@@ -472,8 +513,12 @@ const allTimeSheetsReports = async (req, res) => {
     filter["dataSheet.project"] = { $regex: `${project}`, $options: "i" };
   }
 
+  if (task) {
+    filter["dataSheet.task"] = { $regex: `${task}`, $options: "i" };
+  }
+
   if (ID) {
-    filter["dataSheet.ID"] = ID;
+    filter["dataSheet.ID"] = { $regex: `${ID}`, $options: "i" };
   }
 
   if (hour) {
@@ -662,6 +707,98 @@ const getCategories = async (req, res) => {
   }
 };
 
+const getProject = async (req, res) => {
+  try {
+    const data = await TimeSheet.aggregate([
+      {
+        $unwind: "$dataSheet", // Unwind the array into separate documents
+      },
+      {
+        $group: {
+          _id: "$dataSheet.project", // Group by the unique category values
+        },
+      },
+
+      {
+        $match: {
+          // Exclude categories with specific names
+          _id: {
+            $nin: ["N/A", ""],
+            $exists: true,
+            $ne: null,
+            $ne: "",
+          },
+        },
+      },
+
+      {
+        $project: {
+          _id: 0, // Exclude the default "_id" field from the result
+          project: "$_id", // Rename the "_id" field to "category"
+        },
+      },
+    ]).sort({ project: 1 });
+
+    res.status(200).json({
+      success: true,
+      message: "Categories",
+      data,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something wents wrong!",
+    });
+  }
+};
+
+const getTask = async (req, res) => {
+  try {
+    const data = await TimeSheet.aggregate([
+      {
+        $unwind: "$dataSheet", // Unwind the array into separate documents
+      },
+      {
+        $group: {
+          _id: "$dataSheet.task", // Group by the unique category values
+        },
+      },
+
+      {
+        $match: {
+          // Exclude categories with specific names
+          _id: {
+            $nin: ["N/A", ""],
+            $exists: true,
+            $ne: null,
+            $ne: "",
+          },
+        },
+      },
+
+      {
+        $project: {
+          _id: 0, // Exclude the default "_id" field from the result
+          task: "$_id", // Rename the "_id" field to "category"
+        },
+      },
+    ]).sort({ task: 1 });
+
+    res.status(200).json({
+      success: true,
+      message: "tasks",
+      data,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something wents wrong!",
+    });
+  }
+};
+
 const getNotify = async (req, res) => {
   const { id } = req.params;
   try {
@@ -706,6 +843,63 @@ const openNotification = async (req, res) => {
   }
 };
 
+const getAllNotification = async (req, res) => {
+  try {
+    const data = await TimeSheet.find(
+      { notify: { $exists: true } },
+      "notify createdAt"
+    ).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: "all notification",
+      data,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Something wents wrong!",
+    });
+  }
+};
+
+const acknowledgeNotification = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    await TimeSheet.updateMany(
+      { "notify.users.userId._id": new ObjectId(userId) },
+      { $set: { "notify.users.$.acknowledged": true } }
+    );
+
+    res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    console.log(error?.message);
+  }
+};
+
+const getNotificationsForUser = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const notifications = await TimeSheet.find({
+      "notify.users": {
+        $elemMatch: { "userId._id": new ObjectId(userId), acknowledged: false },
+      },
+    });
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (error) {
+    res.status(401).json({
+      success: true,
+      message: "no notification",
+    });
+  }
+};
+
 export {
   timeSheetData,
   getTimeSheetData,
@@ -716,6 +910,8 @@ export {
   allApproved,
   allRejected,
   editDataById,
+  getProject,
+  getTask,
   sheetDeleteById,
   sheetRejectDecsById,
   allTimeSheetsReports,
@@ -727,6 +923,9 @@ export {
   getCategories,
   getNotify,
   openNotification,
+  getAllNotification,
+  acknowledgeNotification,
+  getNotificationsForUser,
 };
 
 const sendMailToAdmins = async (

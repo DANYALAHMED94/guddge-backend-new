@@ -3,6 +3,7 @@ import express from "express";
 import multer from "multer";
 import User from "../model/userModel.js";
 import fs from "fs";
+import bcrypt from "bcryptjs";
 
 const editPdfRoute = express.Router();
 
@@ -72,9 +73,9 @@ editPdfRoute.put(
           (user.agreementEndDate = agreementEndDate || user.agreementEndDate),
           (user.companyName = companyName || user.companyName),
           (user.identificationNumber =
-            identificationNumber || user.identificationNumber),
+            (await encrypt(identificationNumber)) || user.identificationNumber),
           (user.socialSecurityNumber =
-            socialSecurityNumber || user.socialSecurityNumber),
+            (await encrypt(socialSecurityNumber)) || user.socialSecurityNumber),
           (user.mailingAddress = mailingAddress || user.mailingAddress),
           (user.alternativeEmailAdress =
             alternativeEmailAdress || user.alternativeEmailAdress),
@@ -115,4 +116,9 @@ const removeImage = (file) => {
       console.info(`removed`);
     }
   });
+};
+const encrypt = async (text) => {
+  const salt = await bcrypt.genSalt(16);
+  const hashdata = await bcrypt.hash(text, salt);
+  return hashdata;
 };

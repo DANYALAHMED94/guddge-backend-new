@@ -17,7 +17,16 @@ const timeSheetSchema = mongoose.Schema(
       text: String,
       open: Boolean,
       timesheetId: String,
-      user: { type: mongoose.Types.ObjectId, ref: User },
+      contractorId: String,
+      users: [
+        {
+          userId: {
+            _id: mongoose.Schema.Types.ObjectId,
+          },
+          acknowledged: Boolean,
+        },
+      ],
+      message: String,
     },
     dataSheet: [
       {

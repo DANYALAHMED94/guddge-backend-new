@@ -19,6 +19,11 @@ import {
   getCategories,
   getNotify,
   openNotification,
+  getProject,
+  getTask,
+  getAllNotification,
+  acknowledgeNotification,
+  getNotificationsForUser,
 } from "../controller/timeSheetController.js";
 import express from "express";
 
@@ -28,11 +33,20 @@ timeSheetRouter.post("/view-time-sheets", timeSheetData);
 timeSheetRouter.get("/timesheets/approval/:id", getTimeSheetData);
 timeSheetRouter.get("/timesheets/approval", allAdminApproval);
 timeSheetRouter.get("/timesheets-categories", getCategories);
+timeSheetRouter.get("/timesheets-project", getProject);
+timeSheetRouter.get("/timesheets-task", getTask);
+timeSheetRouter.get("/notification-for-user/:userId", getNotificationsForUser);
 
 timeSheetRouter.get("/view-time-sheets/:id", getDataById);
 timeSheetRouter.put("/view-time-sheets/:id", editDataById);
+timeSheetRouter.put(
+  "/acknowledge-notification/:userId",
+  acknowledgeNotification
+);
 
 timeSheetRouter.get("/notify/:id", getNotify);
+timeSheetRouter.get("/notify", getAllNotification);
+
 timeSheetRouter.put("/notification-open/:id", openNotification);
 
 timeSheetRouter.delete("/timesheets/:id", sheetDeleteById);

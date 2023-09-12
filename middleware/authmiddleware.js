@@ -20,7 +20,7 @@ const checkAuthUser = async (req, res, next) => {
   if (!token) {
     res.status(401).json({
       success: false,
-      message: "Unauthorized user, No Token found",
+      message: "Session has expired, please log in again.",
     });
   }
 };
