@@ -69,7 +69,7 @@ const userSchema = mongoose.Schema({
   },
   filename: {
     type: String,
-    default: "/profile-dummy.jpg",
+    // default: "/profile-dummy.jpg", 
   },
   clientRate: String,
   contractorRate: String,

@@ -32,6 +32,7 @@ const Signup = async (req, res) => {
           process.env.JWT_SECRET,
           { expiresIn: Math.floor(Date.now() / 1000) + 30 * 60 }
         );
+        welcomeMail(saveUser);
         res.status(200).json({
           success: true,
           message: "Signup successful",
@@ -650,6 +651,30 @@ const sendForgetPasswordLink = (user, token) => {
         Click here
     </button>
 </a>`,
+  };
+  try {
+    sgMail.send(msg);
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+const welcomeMail = (user) => {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const msg = {
+    to: `${user?.email}`,
+    from: {
+      name: "guddge",
+      email: "testuser@guddge.com",
+    }, // Use the email address or domain you verified above
+    subject: "Welcome to guddge.",
+    text: `You have successfully signedup to guddge.`,
+    html: `<p style="text-transform: capitalize">${user?.name}</p> 
+
+    <p>You don't have to wait to experience <strong>guddge</strong>. As a welcome to our community,</p> 
+    <p> If you need any help or guidance, just get in touch with support team.</p>
+    <p style="margin-top:20px">Thank you!</p> `,
   };
   try {
     sgMail.send(msg);
