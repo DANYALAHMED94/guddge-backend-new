@@ -115,9 +115,27 @@ const allCalendarEventAndBirthdays = async (req, res) => {
   }
 };
 
+const deleteEvent = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await UserEvents.findByIdAndDelete({ _id: id });
+    res.status(200).json({
+      success: false,
+      message: "Event deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Something wents wrong!",
+      error: error,
+    });
+  }
+};
+
 export {
   calendarEvent,
   allCalendarEvent,
   allHolidayEvent,
   allCalendarEventAndBirthdays,
+  deleteEvent,
 };

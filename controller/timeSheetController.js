@@ -28,7 +28,10 @@ const timeSheetData = async (req, res) => {
         });
       }
     } else {
-      const allMails = await User.find({ role: "Admin" }, projection);
+      const allMails = await User.find(
+        { role: { $in: ["Admin", "Super Admin"] } },
+        projection
+      );
       const emails = allMails.map((user) => user.email);
       try {
         const dataTable = await TimeSheet.insertMany(req.body);
@@ -159,7 +162,10 @@ const getApproved = async (req, res) => {
   const { status, approvalDate, approvedBy, desc } = req.body;
 
   const getIdValue = await TimeSheet.findById(id);
-  const allMails = await User.find({ role: "Admin" }, projection);
+  const allMails = await User.find(
+    { role: { $in: ["Admin", "Super Admin"] } },
+    projection
+  );
   const emails = allMails.map((user) => user.email);
   const contractor = await User.findById(getIdValue?.user);
   const userIds = await User.find(
