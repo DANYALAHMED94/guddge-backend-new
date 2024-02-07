@@ -332,7 +332,7 @@ const allClients = async (req, res) => {
 
 const changePasswordAndUpdate = async (req, res) => {
   const { oldPassword, new_password } = req.body;
-  const { id } = req.params;
+  const { id } = req.params; 
 
   const user = await User.findById({ _id: id });
 
@@ -344,7 +344,7 @@ const changePasswordAndUpdate = async (req, res) => {
         if (oldPassword && new_password && oldPassword !== new_password) {
           const salt = await bcrypt.genSalt(10);
           const newHashPassword = await bcrypt.hash(new_password, salt);
-          await User.findByIdAndUpdate(user._id, {
+          await User.findByIdAndUpdate(user._id, { 
             password: newHashPassword,
           });
 
